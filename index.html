@@ -953,6 +953,9 @@
         <div class="clock-time" id="tickerClock">00:00:00</div>
         <div class="clock-date" id="tickerDate">Memuat tanggal...</div>
       </div>
+      <button class="btn btn-secondary btn-sm" id="btnAudioArming" onclick="toggleAudioArming()" title="Buka kunci audio dan izin notifikasi agar sirene darurat bersuara otomatis">
+        🛡️ Siaga: Aktifkan
+      </button>
       <button class="btn btn-secondary btn-sm" id="btnInstallPwa" style="display:none;" onclick="triggerPwaInstall()" title="Pasang aplikasi ke layar utama tablet">
         📲 Pasang Aplikasi (PWA)
       </button>
@@ -1559,7 +1562,7 @@
     // ==========================================
     var APP_CONFIG = {
       // Masukkan Web App Deployment URL Anda di sini (akhiran /exec)
-      DEFAULT_GAS_API_URL: "",
+      DEFAULT_GAS_API_URL: "https://script.google.com/macros/s/AKfycbx6fibvmn9fdW-GectHIo8VS_iMpMYRUZFVsT1WtfJx9kDhmkoy2jNJyzmu9iyu-m8k/exec",
       OVERSTAY_HOURS: 4,
       ADMIN_PIN: "2026"
     };
@@ -1578,6 +1581,10 @@
       sirenOscillator: null,
       sirenAudioContext: null,
       audioCtx: null,
+      isAudioArmed: false,
+      swRegistration: null,
+      pollingTimer: null,
+      consecutivePollingErrors: 0,
       lastGeneratedQrString: '',
       wakeLockSentinel: null,
       html5QrCodeInstance: null,
@@ -1586,7 +1593,17 @@
       deferredPwaPrompt: null,
       currentCameraFacing: 'environment',
       isTorchOn: false,
-      gasApiUrl: (typeof localStorage !== 'undefined' && localStorage.getItem('WALINI_GAS_API_URL')) || APP_CONFIG.DEFAULT_GAS_API_URL || ''
+      gasApiUrl: (function() {
+        // Deteksi parameter URL (?api=...) untuk mempermudah sinkronisasi otomatis antar ponsel
+        var urlParams = new URLSearchParams(window.location.search);
+        var paramApi = urlParams.get('api');
+        if (paramApi) {
+          if (typeof localStorage !== 'undefined') localStorage.setItem('WALINI_GAS_API_URL', paramApi);
+          return paramApi;
+        }
+        var saved = (typeof localStorage !== 'undefined') ? localStorage.getItem('WALINI_GAS_API_URL') : '';
+        return saved || APP_CONFIG.DEFAULT_GAS_API_URL || '';
+      })()
     };
 
     var previewDummyData = [
@@ -1607,12 +1624,73 @@
     window.addEventListener('DOMContentLoaded', function() {
       initClock();
       initPwaInstaller();
+      initServiceWorker();
       fetchGuests(1);
       loadMasterBlok();
       startEmergencyWatcher();
       initScreenWakeLock();
       requestNotificationPermissionSilently();
+
+      // Membuka kunci audio otomatis saat layar disentuh pertama kali
+      document.addEventListener('click', autoUnlockAudioGesture, { once: false });
+      document.addEventListener('touchstart', autoUnlockAudioGesture, { once: false });
     });
+
+    function initServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('sw.js').then(function(reg) {
+          state.swRegistration = reg;
+          console.log('ServiceWorker registered successfully:', reg.scope);
+        }).catch(function(err) {
+          console.warn('ServiceWorker registration error:', err);
+        });
+      }
+    }
+
+    function autoUnlockAudioGesture() {
+      if (!state.isAudioArmed) {
+        warmUpAudioEngine();
+      }
+    }
+
+    function warmUpAudioEngine() {
+      try {
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          if (!state.audioCtx) state.audioCtx = new AudioContextClass();
+          if (state.audioCtx.state === 'suspended') state.audioCtx.resume();
+
+          if (!state.sirenAudioContext) state.sirenAudioContext = new AudioContextClass();
+          if (state.sirenAudioContext.state === 'suspended') state.sirenAudioContext.resume();
+
+          state.isAudioArmed = true;
+          updateAudioArmingBadge(true);
+        }
+      } catch (e) {
+        console.warn('Audio warm-up notice:', e);
+      }
+    }
+
+    function toggleAudioArming() {
+      warmUpAudioEngine();
+      requestNotificationPermissionSilently();
+      testNotificationAndSiren();
+    }
+
+    function updateAudioArmingBadge(isArmed) {
+      var btn = document.getElementById('btnAudioArming');
+      if (btn) {
+        if (isArmed) {
+          btn.innerHTML = '🛡️ Siaga: AKTIF 🟢';
+          btn.style.borderColor = 'var(--accent-neon)';
+          btn.style.color = 'var(--accent-neon)';
+        } else {
+          btn.innerHTML = '🛡️ Siaga: Aktifkan';
+          btn.style.borderColor = 'var(--border-subtle)';
+          btn.style.color = 'var(--text-main)';
+        }
+      }
+    }
 
     function initClock() {
       function update() {
@@ -1674,8 +1752,32 @@
     function requestNotificationPermissionSilently() {
       if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission().then(function(perm) {
-          console.log('Notification permission:', perm);
+          console.log('Notification permission status:', perm);
         });
+      }
+    }
+
+    function showCrossPlatformNotification(title, options) {
+      options = options || {};
+      options.icon = options.icon || 'https://placehold.co/128x128/ef4444/ffffff?text=SOS';
+      options.badge = options.badge || 'https://placehold.co/96x96/ef4444/ffffff?text=!';
+      options.vibrate = options.vibrate || [200, 100, 200, 100, 400];
+      options.requireInteraction = true;
+      options.tag = 'walini-sos-urgent';
+
+      // 1. Prioritas Utama: ServiceWorker Registration (Wajib untuk Chrome Android & Mobile)
+      if (state.swRegistration && state.swRegistration.showNotification) {
+        state.swRegistration.showNotification(title, options);
+        return;
+      }
+
+      // 2. Fallback: Standar Web Notification (Desktop / macOS / Laptop)
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification(title, options);
+        } catch (e) {
+          console.warn('Direct notification error (mobile sandbox):', e);
+        }
       }
     }
 
@@ -1683,11 +1785,10 @@
       if ('Notification' in window) {
         Notification.requestPermission().then(function(perm) {
           if (perm === 'granted') {
-            new Notification('🚨 TES NOTIFIKASI POS SATPAM WALINI', {
-              body: 'Sistem notifikasi background darurat aktif normal!',
-              icon: 'https://placehold.co/128x128/ef4444/ffffff?text=SOS'
+            showCrossPlatformNotification('🚨 TES NOTIFIKASI POS SATPAM WALINI', {
+              body: 'Sistem notifikasi background darurat aktif normal!'
             });
-            showToast('✅ Izin Notifikasi Sistem: AKTIF & BERFUNGSI', 'success');
+            showToast('✅ Izin Notifikasi & Audio Siaga: AKTIF', 'success');
           } else {
             showToast('⚠️ Izin notifikasi browser belum diberikan', 'warning');
           }
@@ -2542,34 +2643,51 @@
         catatan: 'Alarm Panic SOS diaktifkan dari ponsel warga'
       };
 
+      if (!state.gasApiUrl && typeof google === 'undefined') {
+        showToast('⚠️ URL Database belum terhubung. Konfigurasikan URL API pada menu Pengaturan Admin atau gunakan tautan ?api=URL.', 'warning');
+      }
+
       requestBackend('triggerEmergencySOS', payload, function(res) {
         closeSosResidentModal();
         if (res && res.success) {
           showToast('🚨 Sinyal darurat dikirimkan! Bantuan & siaran WhatsApp meluncur.', 'warning');
         } else {
-          showToast('[Preview] Sinyal SOS Terkirim!', 'warning');
+          showToast('[Simulasi] Sinyal SOS Terkirim!', 'warning');
           triggerVisualAndAudioAlarm({
-            id: 'EMG-DEMO',
+            id: 'EMG-SIMULASI',
             blok: blok,
             penghuni: 'Keluarga Bpk. Adit',
             kontak: '085712349876',
             kategori: kat,
-            waktu: 'Sekarang'
+            waktu: 'Baru saja'
           });
         }
       });
     }
 
     function startEmergencyWatcher() {
-      setInterval(function() {
+      if (state.pollingTimer) clearInterval(state.pollingTimer);
+
+      // Polling cerdas adaptif setiap 10 detik agar tidak menghabiskan kuota harian Apps Script
+      state.pollingTimer = setInterval(function() {
+        // Jangan lakukan request backend jika URL belum dikonfigurasi dan di luar Google Script
+        if (!state.gasApiUrl && typeof google === 'undefined') return;
+
         requestBackend('checkActiveEmergency', null, function(res) {
-          if (res && res.success && res.active && res.data) {
-            if (state.lastAlertedEmergencyId !== res.data.id) {
-              triggerVisualAndAudioAlarm(res.data);
+          if (res && res.success) {
+            state.consecutivePollingErrors = 0;
+            if (res.active && res.data) {
+              if (state.lastAlertedEmergencyId !== res.data.id) {
+                triggerVisualAndAudioAlarm(res.data);
+              }
             }
+          } else {
+            state.consecutivePollingErrors++;
           }
+        }, function(err) {
+          state.consecutivePollingErrors++;
         });
-      }, 4000);
+      }, 10000);
     }
 
     function triggerVisualAndAudioAlarm(data) {
@@ -2585,18 +2703,10 @@
       startSirenAudio();
       triggerHapticFeedback();
 
-      if ('Notification' in window && Notification.permission === 'granted') {
-        try {
-          new Notification('🚨 DARURAT POS SATPAM: ' + data.blok, {
-            body: data.penghuni + ' - ' + data.kategori + ' (' + data.waktu + ' WIB). Respon segera!',
-            icon: 'https://placehold.co/128x128/ef4444/ffffff?text=SOS',
-            requireInteraction: true,
-            tag: 'walini-sos-alert'
-          });
-        } catch (e) {
-          console.warn('System Notification error:', e);
-        }
-      }
+      // Kirim notifikasi sistem resmi lintas platform (Desktop & Android Mobile via ServiceWorker)
+      showCrossPlatformNotification('🚨 PERINGATAN DARURAT: ' + data.blok, {
+        body: data.penghuni + ' - ' + data.kategori + ' (' + data.waktu + ' WIB). Respon segera!'
+      });
     }
 
     function startSirenAudio() {
@@ -2607,24 +2717,45 @@
         if (state.sirenAudioContext.state === 'suspended') {
           state.sirenAudioContext.resume();
         }
+
         if (!state.sirenOscillator) {
-          var osc = state.sirenAudioContext.createOscillator();
-          var gain = state.sirenAudioContext.createGain();
+          var ctx = state.sirenAudioContext;
+          var osc = ctx.createOscillator();
+          var gain = ctx.createGain();
+
           osc.type = 'sawtooth';
-          osc.frequency.setValueAtTime(500, state.sirenAudioContext.currentTime);
-          osc.frequency.exponentialRampToValueAtTime(1000, state.sirenAudioContext.currentTime + 0.6);
-          gain.gain.setValueAtTime(0.18, state.sirenAudioContext.currentTime);
+          
+          // Mengatur modulasi nada sirene dua-frekuensi (650 Hz ke 950 Hz bergantian)
+          var now = ctx.currentTime;
+          osc.frequency.setValueAtTime(650, now);
+          osc.frequency.linearRampToValueAtTime(950, now + 0.35);
+          osc.frequency.linearRampToValueAtTime(650, now + 0.7);
+
+          // Interval osilasi nada sirene berkelanjutan
+          state.sirenInterval = setInterval(function() {
+            if (!state.sirenOscillator || !state.sirenAudioContext) return;
+            var t = state.sirenAudioContext.currentTime;
+            osc.frequency.setValueAtTime(650, t);
+            osc.frequency.linearRampToValueAtTime(950, t + 0.35);
+            osc.frequency.linearRampToValueAtTime(650, t + 0.7);
+          }, 700);
+
+          gain.gain.setValueAtTime(0.3, ctx.currentTime);
           osc.connect(gain);
-          gain.connect(state.sirenAudioContext.destination);
+          gain.connect(ctx.destination);
           osc.start();
           state.sirenOscillator = osc;
         }
       } catch (e) {
-        console.log('Audio policy:', e);
+        console.warn('Audio policy notification:', e);
       }
     }
 
     function stopSirenAudioOnly() {
+      if (state.sirenInterval) {
+        clearInterval(state.sirenInterval);
+        state.sirenInterval = null;
+      }
       if (state.sirenOscillator) {
         try {
           state.sirenOscillator.stop();
