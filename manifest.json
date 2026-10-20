@@ -1,0 +1,27 @@
+/* STREAMING_CHUNK:Configuring PWA application metadata and display properties */
+{
+"name": "THE GREEN WALINI - Sistem Catatan Tamu",
+"short_name": "Pos Walini",
+"description": "Sistem Catatan Tamu Pos Satpam & Keamanan Komplek The Green Walini",
+"start_url": "./index.html",
+"scope": "./",
+"display": "standalone",
+"orientation": "any",
+"background_color": "#0b0f19",
+"theme_color": "#0b0f19",
+"categories": ["utilities", "security", "productivity"],
+"icons": [
+{
+"src": "https://placehold.co/192x192/0b0f19/00ffaa?text=GW",
+"sizes": "192x192",
+"type": "image/png",
+"purpose": "any maskable"
+},
+{
+"src": "https://placehold.co/512x512/0b0f19/00ffaa?text=WALINI",
+"sizes": "512x512",
+"type": "image/png",
+"purpose": "any maskable"
+}
+]
+}
