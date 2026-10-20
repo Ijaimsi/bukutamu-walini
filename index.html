@@ -1,0 +1,2917 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>THE GREEN WALINI - Sistem Catatan Tamu Pos Satpam</title>
+
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pos Walini">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/0b0f19/00ffaa?text=GW">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- PWA Manifest & Mobile Standalone Meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0b0f19">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Pos Walini">
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/0b0f19/00ffaa?text=GW">
+
+  <!-- Html5-Qrcode In-Memory Image Engine -->
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <style>
+    :root {
+      --bg-base: #0b0f19;
+      --bg-surface: #151b26;
+      --bg-card: #1a2232;
+      --bg-card-hover: #222d42;
+      --border-subtle: rgba(255, 255, 255, 0.08);
+      --border-focus: #6366f1;
+      --accent-neon: #00ffaa;
+      --accent-emerald: #10b981;
+      --accent-indigo: #6366f1;
+      --accent-amber: #f59e0b;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --text-dim: #64748b;
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --shadow-soft: 0 8px 24px -4px rgba(0, 0, 0, 0.4);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-main);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.5;
+    }
+
+    .topbar {
+      background-color: var(--bg-surface);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 12px 20px;
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, rgba(0, 255, 170, 0.15), rgba(99, 102, 241, 0.25));
+      border: 1px solid var(--accent-neon);
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent-neon);
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand-text p {
+      font-size: 0.72rem;
+      color: var(--accent-neon);
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+
+    .topbar-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .btn-pwa-install {
+      background: linear-gradient(135deg, #00ffaa, #059669);
+      color: #0b0f19;
+      font-weight: 700;
+      animation: pulseGlow 3s infinite;
+    }
+
+    .live-camera-container {
+      width: 100%;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      background: #000;
+      border: 2px solid var(--accent-neon);
+      margin-bottom: 12px;
+      position: relative;
+      min-height: 250px;
+    }
+
+    #qrLiveReaderNode video {
+      width: 100% !important;
+      height: auto !important;
+      object-fit: cover;
+      border-radius: var(--radius-md);
+    }
+
+    .scanner-controls-bar {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .clock-time {
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--accent-neon);
+    }
+
+    .clock-date {
+      font-size: 0.68rem;
+      color: var(--text-muted);
+    }
+
+    .container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 20px;
+      width: 100%;
+      flex: 1;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: border-color 0.2s ease;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(255, 255, 255, 0.16);
+    }
+
+    .stat-info h3 {
+      font-size: 0.76rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      font-weight: 600;
+    }
+
+    .stat-info .stat-value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+      color: #fff;
+    }
+
+    .stat-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+    }
+
+    .stat-active .stat-icon { background: rgba(16, 185, 129, 0.12); color: var(--accent-emerald); }
+    .stat-overstay .stat-icon { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); }
+    .stat-total .stat-icon { background: rgba(99, 102, 241, 0.12); color: var(--accent-indigo); }
+    .stat-selesai .stat-icon { background: rgba(148, 163, 184, 0.12); color: var(--text-muted); }
+
+    .workspace-grid {
+      display: grid;
+      grid-template-columns: 390px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 1024px) {
+      .workspace-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-body {
+      padding: 20px;
+    }
+
+    .quickpass-card {
+      background: linear-gradient(145deg, #16202e, #111824);
+      border: 1px dashed rgba(0, 255, 170, 0.35);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .quickpass-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .quickpass-tag {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--accent-neon);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fingerprint-sensor-area {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      user-select: none;
+    }
+
+    .fingerprint-sensor-area:hover {
+      border-color: var(--accent-neon);
+      background: rgba(0, 255, 170, 0.05);
+    }
+
+    .sensor-scanner-circle {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: rgba(0, 255, 170, 0.1);
+      border: 2px solid var(--accent-neon);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .sensor-scanner-circle svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--accent-neon);
+      fill: none;
+    }
+
+    .sensor-prompt strong {
+      display: block;
+      font-size: 0.82rem;
+      color: #fff;
+    }
+
+    .sensor-prompt span {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+    }
+
+    .quickpass-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .preset-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .preset-pill:hover {
+      background: rgba(0, 255, 170, 0.15);
+      color: var(--accent-neon);
+      border-color: var(--accent-neon);
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    label span.req {
+      color: var(--accent-rose);
+    }
+
+    .input-control, select.input-control, textarea.input-control {
+      width: 100%;
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      color: #ffffff;
+      padding: 10px 12px;
+      font-size: 0.86rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-control:focus {
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    .input-plate {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    textarea.input-control {
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 0.85rem;
+      padding: 9px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-block {
+      width: 100%;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #059669, #047857);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .btn-admin {
+      background: rgba(99, 102, 241, 0.15);
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: #a5b4fc;
+    }
+
+    .btn-admin:hover {
+      background: rgba(99, 102, 241, 0.28);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: rgba(244, 63, 94, 0.18);
+      border: 1px solid rgba(244, 63, 94, 0.4);
+      color: #fca5a5;
+    }
+
+    .btn-danger:hover {
+      background: rgba(244, 63, 94, 0.3);
+    }
+
+    .btn-sos {
+      background: linear-gradient(135deg, #ef4444, #b91c1c);
+      color: #fff;
+      font-weight: 700;
+      animation: pulseSos 2s infinite;
+    }
+
+    .btn-scanner-hero {
+      background: linear-gradient(135deg, #00ffaa, #10b981);
+      color: #0b0f19;
+      font-weight: 800;
+      box-shadow: 0 6px 20px rgba(0, 255, 170, 0.35);
+      padding: 14px 20px;
+      font-size: 0.95rem;
+    }
+
+    .btn-scanner-hero:hover {
+      background: linear-gradient(135deg, #00e699, #059669);
+      color: #000;
+    }
+
+    @keyframes pulseSos {
+      0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
+      50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.9); }
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+      border-radius: 6px;
+    }
+
+    .toolbar-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .search-box {
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+
+    .search-box input {
+      padding-left: 38px;
+    }
+
+    .search-box svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-dim);
+    }
+
+    .status-filters {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+    }
+
+    .filter-btn {
+      background: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s ease;
+    }
+
+    .filter-btn.active {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      border-color: var(--accent-indigo);
+    }
+
+    .guest-list-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-height: 280px;
+    }
+
+    .guest-card {
+      background-color: var(--bg-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: transform 0.15s ease, border-color 0.2s ease;
+    }
+
+    .guest-card:hover {
+      border-color: rgba(255, 255, 255, 0.14);
+      background-color: var(--bg-card-hover);
+    }
+
+    .guest-card.is-overstay {
+      border-left: 4px solid var(--accent-amber);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .plate-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 0.95rem;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 3px 8px;
+      border-radius: 6px;
+      color: #ffffff;
+    }
+
+    .badge-status {
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 12px;
+      text-transform: uppercase;
+    }
+
+    .badge-masuk {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-selesai {
+      background: rgba(148, 163, 184, 0.12);
+      color: #94a3b8;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .badge-overstay {
+      background: rgba(245, 158, 11, 0.18);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      animation: pulseOverstay 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseOverstay {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.6; }
+    }
+
+    .card-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 8px;
+      font-size: 0.78rem;
+      background: rgba(0, 0, 0, 0.15);
+      padding: 8px 12px;
+      border-radius: var(--radius-sm);
+    }
+
+    .card-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .duration-indicator {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .pagination-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 16px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-subtle);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 100;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.show {
+      display: flex;
+    }
+
+    .modal-content {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 600px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-lg {
+      max-width: 960px;
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 1.4rem;
+      cursor: pointer;
+    }
+
+    .modal-close:hover {
+      color: #fff;
+    }
+
+    .modal-body {
+      padding: 20px;
+    }
+
+    .native-scanner-hero-card {
+      background: linear-gradient(145deg, #162536, #0e1724);
+      border: 2px dashed #00ffaa;
+      border-radius: var(--radius-md);
+      padding: 24px 20px;
+      text-align: center;
+      margin-bottom: 16px;
+      box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);
+    }
+
+    .scanner-target-icon {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(0, 255, 170, 0.1);
+      border: 2px solid #00ffaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      animation: pulseGlow 2.5s infinite;
+    }
+
+    .scanner-target-icon svg {
+      width: 44px;
+      height: 44px;
+      stroke: #00ffaa;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 170, 0.3); }
+      50% { box-shadow: 0 0 25px rgba(0, 255, 170, 0.8); }
+    }
+
+    .admin-tabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 1px solid var(--border-subtle);
+      margin-bottom: 18px;
+      overflow-x: auto;
+    }
+
+    .admin-tab-btn {
+      background: none;
+      border: none;
+      border-bottom: 2px solid transparent;
+      color: var(--text-muted);
+      padding: 8px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .admin-tab-btn.active {
+      color: var(--accent-neon);
+      border-bottom-color: var(--accent-neon);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .audit-table-wrapper {
+      max-height: 380px;
+      overflow-y: auto;
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+    }
+
+    .audit-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+    }
+
+    .audit-table th {
+      background: var(--bg-card);
+      color: var(--text-muted);
+      text-align: left;
+      padding: 10px;
+      position: sticky;
+      top: 0;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .audit-table td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-main);
+    }
+
+    .emergency-strobe-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(185, 28, 28, 0.95);
+      z-index: 999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: strobeRed 1s infinite alternate;
+      color: #fff;
+      text-align: center;
+    }
+
+    @keyframes strobeRed {
+      from { background: rgba(153, 27, 27, 0.95); }
+      to { background: rgba(239, 68, 68, 0.95); }
+    }
+
+    .emergency-box {
+      background: #0f172a;
+      border: 3px solid #fecaca;
+      border-radius: var(--radius-lg);
+      padding: 30px;
+      max-width: 650px;
+      width: 100%;
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+      color: #fff;
+    }
+
+    .emergency-box h2 {
+      font-size: 1.8rem;
+      color: #ef4444;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .panic-button-circle {
+      width: 140px;
+      height: 140px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ef4444, #991b1b);
+      border: 6px solid #fca5a5;
+      color: #fff;
+      font-size: 1.3rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      margin: 20px auto;
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+      transition: transform 0.1s ease;
+    }
+
+    .panic-button-circle:active {
+      transform: scale(0.92);
+    }
+
+    .qr-preview-box {
+      background: #ffffff;
+      padding: 16px;
+      border-radius: var(--radius-md);
+      display: inline-block;
+      margin: 16px auto;
+    }
+
+    .qr-preview-box img {
+      width: 190px;
+      height: 190px;
+      display: block;
+    }
+
+    .toast-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      pointer-events: none;
+    }
+
+    .toast {
+      pointer-events: auto;
+      background: var(--bg-surface);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      color: #fff;
+      font-size: 0.84rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+      animation: slideIn 0.25s ease-out;
+      max-width: 360px;
+    }
+
+    .toast-success { border-left: 4px solid var(--accent-emerald); }
+    .toast-warning { border-left: 4px solid var(--accent-amber); }
+    .toast-error { border-left: 4px solid var(--accent-rose); }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">GW</div>
+      <div class="brand-text">
+        <h1>THE GREEN WALINI</h1>
+        <p>POS KEAMANAN UTAMA &bull; BUKU TAMU &amp; INTEGRASI WARGA</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <div class="clock-display">
+        <div class="clock-time" id="tickerClock">00:00:00</div>
+        <div class="clock-date" id="tickerDate">Memuat tanggal...</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btnInstallPwa" style="display:none;" onclick="triggerPwaInstall()" title="Pasang aplikasi ke layar utama tablet">
+        📲 Pasang Aplikasi (PWA)
+      </button>
+      <button class="btn btn-sos btn-sm" onclick="openSosResidentModal()">
+        🚨 Portal SOS Warga
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="testNotificationAndSiren()" title="Uji Coba Suara Sirene dan Izin Notifikasi Sistem">
+        🔔 Tes Alarm &amp; Notif
+      </button>
+      <button class="btn btn-primary btn-sm" onclick="openQrScanModal()">
+        📷 Scan QR Pas
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="openQrGenModal()">
+        🎫 Buat Pas Tamu
+      </button>
+      <button class="btn btn-admin btn-sm" onclick="openAdminPinModal()">
+        🔒 Panel Admin
+      </button>
+      <button class="btn btn-secondary btn-sm" onclick="openShiftModal()">
+        📋 Rekap Shift
+      </button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="stats-grid">
+      <div class="stat-card stat-active">
+        <div class="stat-info">
+          <h3>Tamu Di Dalam</h3>
+          <div class="stat-value" id="statAktif">0</div>
+        </div>
+        <div class="stat-icon">🟢</div>
+      </div>
+      <div class="stat-card stat-overstay">
+        <div class="stat-info">
+          <h3>Peringatan Overstay</h3>
+          <div class="stat-value" id="statOverstay">0</div>
+        </div>
+        <div class="stat-icon">⚠️</div>
+      </div>
+      <div class="stat-card stat-total">
+        <div class="stat-info">
+          <h3>Total Tamu Hari Ini</h3>
+          <div class="stat-value" id="statTotal">0</div>
+        </div>
+        <div class="stat-icon">📋</div>
+      </div>
+      <div class="stat-card stat-selesai">
+        <div class="stat-info">
+          <h3>Sudah Check-Out</h3>
+          <div class="stat-value" id="statSelesai">0</div>
+        </div>
+        <div class="stat-icon">🏁</div>
+      </div>
+    </section>
+
+    <div class="workspace-grid">
+      <aside class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+            Input Tamu Masuk (Check-In)
+          </div>
+        </div>
+        <div class="panel-body">
+          
+          <div class="quickpass-card">
+            <div class="quickpass-header">
+              <span class="quickpass-tag">⚡ QUICK PASS VALIDATION</span>
+              <span style="font-size:0.68rem; color:var(--text-dim);">Kurir & Tamu Rutin</span>
+            </div>
+            
+            <div class="fingerprint-sensor-area" id="fingerprintBtn" onclick="simulateFingerprintValidation()">
+              <div class="sensor-scanner-circle">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M12 2a10 10 0 0 0-10 10v2a4 4 0 0 0 4 4h1a2 2 0 0 0 2-2v-4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h1a4 4 0 0 0 4-4v-2a10 10 0 0 0-10-10z"></path><path d="M12 6a6 6 0 0 0-6 6v2"></path><path d="M12 10a2 2 0 0 0-2 2v2"></path></svg>
+              </div>
+              <div class="sensor-prompt">
+                <strong>Sentuh Sensor Validasi Kilat</strong>
+                <span>Panggil profil kurir rutin & ekspedisi</span>
+              </div>
+            </div>
+
+            <div class="quickpass-presets">
+              <span class="preset-pill" onclick="applyQuickPassPreset('SiCepat Express', 'Kurir Paket', 'B 6543 PO', 'Motor')">📦 SiCepat</span>
+              <span class="preset-pill" onclick="applyQuickPassPreset('J&T Express', 'Kurir Paket', 'D 4512 JK', 'Motor')">🚚 J&T</span>
+              <span class="preset-pill" onclick="applyQuickPassPreset('Gojek (GoFood)', 'Ojol', 'D 9981 AB', 'Motor')">🍔 GoFood</span>
+              <span class="preset-pill" onclick="applyQuickPassPreset('Teknisi Indihome', 'Teknisi/Tukang', 'D 1287 ZY', 'Mobil')">🔧 Indihome</span>
+              <span class="preset-pill" onclick="applyQuickPassPreset('Antar Galon/Gas', 'Kurir Paket', 'D 3341 GH', 'Motor')">💧 Air/Gas</span>
+            </div>
+          </div>
+
+          <form id="checkInForm" onsubmit="event.preventDefault(); submitCheckIn();">
+            <div class="form-group">
+              <label>Nama Tamu / Kurir / Vendor <span class="req">*</span></label>
+              <input type="text" id="inputNama" class="input-control" placeholder="Contoh: Budi Santoso" required>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Nomor WhatsApp</label>
+                <input type="tel" id="inputKontak" class="input-control" placeholder="08xxxxxxxxxx">
+              </div>
+              <div class="form-group">
+                <label>Plat Nomor <span class="req">*</span></label>
+                <input type="text" id="inputPlat" class="input-control input-plate" placeholder="D 1234 ABC" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Jenis Kendaraan</label>
+                <select id="selectKendaraan" class="input-control">
+                  <option value="Motor">Motor</option>
+                  <option value="Mobil">Mobil</option>
+                  <option value="Box/Truk">Box / Truk</option>
+                  <option value="Sepeda/Jalan">Sepeda / Jalan</option>
+                  <option value="Lainnya">Lainnya</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Blok Tujuan <span class="req">*</span></label>
+                <input type="text" id="inputBlok" class="input-control" placeholder="Pilih / ketik Blok" list="masterBlokList" required>
+                <datalist id="masterBlokList"></datalist>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label>Keperluan Kunjungan</label>
+              <select id="selectKeperluan" class="input-control">
+                <option value="Tamu Warga">Tamu Warga</option>
+                <option value="Kurir Paket">Kurir Paket</option>
+                <option value="Ojol">Ojol (GoFood/GrabFood)</option>
+                <option value="Teknisi/Tukang">Teknisi / Renovasi</option>
+                <option value="Lainnya">Lainnya</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Catatan Petugas (Opsional)</label>
+              <textarea id="inputCatatan" class="input-control" placeholder="Tinggalkan catatan khusus jika ada"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block" id="btnSubmit">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg>
+              Catat Tamu Masuk (Check-In)
+            </button>
+          </form>
+
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+            Live Board Kunjungan Tamu
+          </div>
+          <button class="btn btn-secondary btn-sm" onclick="fetchGuests(1)">
+            🔄 Segarkan
+          </button>
+        </div>
+
+        <div class="panel-body">
+          <div class="toolbar-grid">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+              <input type="text" id="searchKeyword" class="input-control" placeholder="Cari Plat, Nama, Blok..." oninput="handleSearchInput()">
+            </div>
+            
+            <div class="status-filters">
+              <button class="filter-btn active" data-status="SEMUA" onclick="setFilterStatus('SEMUA')">Semua</button>
+              <button class="filter-btn" data-status="MASUK" onclick="setFilterStatus('MASUK')">Di Dalam</button>
+              <button class="filter-btn" data-status="OVERSTAY" onclick="setFilterStatus('OVERSTAY')">Overstay ⚠️</button>
+              <button class="filter-btn" data-status="SELESAI" onclick="setFilterStatus('SELESAI')">Selesai</button>
+            </div>
+          </div>
+
+          <div class="guest-list-container" id="guestListContainer"></div>
+
+          <div class="pagination-bar">
+            <span style="font-size:0.75rem; color:var(--text-muted);" id="paginationInfo">Memuat data...</span>
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary btn-sm" id="btnPrevPage" onclick="changePage(-1)" disabled>&larr; Prev</button>
+              <button class="btn btn-secondary btn-sm" id="btnNextPage" onclick="changePage(1)" disabled>Next &rarr;</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="modal-backdrop" id="qrScanModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">📷 Pindai QR Pas Tamu Digital</h3>
+        <button class="modal-close" onclick="closeQrScanModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        
+        <div class="live-camera-container" id="cameraViewerBox">
+          <div id="qrLiveReaderNode"></div>
+        </div>
+
+        <div class="scanner-controls-bar">
+          <button class="btn btn-secondary btn-sm" onclick="toggleSwitchCamera()" id="btnSwitchCamera">
+            🔄 Ganti Kamera
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="toggleTorchFlash()" id="btnTorchFlash">
+            🔦 Senter: OFF
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="triggerNativeCameraScan()">
+            📸 Jepret Native
+          </button>
+          <button class="btn btn-secondary btn-sm" onclick="toggleManualQrInput()">
+            ⌨️ Manual
+          </button>
+        </div>
+
+        <input type="file" id="qrNativeFileInput" accept="image/*" capture="environment" style="display:none;" onchange="handleNativeQrCapture(event)">
+
+        <div id="qrManualArea" style="display:none; margin-top:14px; text-align:left;">
+          <label>Atau tempel data teks JSON QR secara manual:</label>
+          <textarea id="inputQrRawData" class="input-control" placeholder='{"namaTamu":"...","blokTujuan":"..."}' style="min-height:75px; font-family:'JetBrains Mono'; font-size:0.75rem; margin-bottom:8px;"></textarea>
+          <button class="btn btn-primary btn-block btn-sm" onclick="processScannedQrData()">
+            ⚡ Validasi &amp; Check-In Teks
+          </button>
+        </div>
+
+        <div id="qrScanResultAlert" style="display:none; padding:12px; border-radius:var(--radius-sm); font-size:0.82rem; margin-top:12px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminPinModal">
+    <div class="modal-content" style="max-width: 380px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🔒 Otorisasi Panel Admin</h3>
+        <button class="modal-close" onclick="closeAdminPinModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+          Masukkan PIN Keamanan untuk membuka modul administrasi, direktori kavling, audit trail, ekspor data, dan nomor darurat broadcast.
+        </p>
+        <form onsubmit="event.preventDefault(); verifyPinAndProceed();">
+          <div class="form-group">
+            <label>PIN Admin</label>
+            <input type="password" id="inputAdminPin" class="input-control" placeholder="Default: 2026" maxlength="8" style="text-align:center; font-size:1.2rem; letter-spacing:4px;" required autofocus>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="btnSubmitPin">Buka Panel Admin</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="adminPanelModal">
+    <div class="modal-content modal-lg">
+      <div class="modal-header">
+        <div class="modal-title">⚙️ Panel Administrasi &amp; Manajemen Komplek</div>
+        <button class="modal-close" onclick="closeAdminPanelModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        
+        <div class="admin-tabs">
+          <button class="admin-tab-btn active" onclick="switchAdminTab('tabKavling')">🏡 Direktori Kavling</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab('tabAudit')">📜 Audit Trail Log</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab('tabEkspor')">📊 Ekspor Laporan</button>
+          <button class="admin-tab-btn" onclick="switchAdminTab('tabConfig')">🌐 Pengaturan Gateway &amp; Darurat</button>
+        </div>
+
+        <!-- TAB 1: CRUD KAVLING -->
+        <div id="tabKavling" class="tab-content active">
+          <div style="display:grid; grid-template-columns:300px 1fr; gap:16px;">
+            <div style="background:var(--bg-card); padding:14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
+              <h4 style="font-size:0.88rem; margin-bottom:12px; color:#fff;" id="formBlokTitle">Tambah Kavling Baru</h4>
+              <form id="masterBlokForm" onsubmit="event.preventDefault(); submitSaveMasterBlok();">
+                <div class="form-group">
+                  <label>Nomor Blok / Kavling <span class="req">*</span></label>
+                  <input type="text" id="inputBlokNomor" class="input-control" placeholder="Contoh: Blok E-01" required>
+                </div>
+                <div class="form-group">
+                  <label>Nama Penghuni <span class="req">*</span></label>
+                  <input type="text" id="inputBlokPenghuni" class="input-control" placeholder="Contoh: Bpk. Gunawan" required>
+                </div>
+                <div class="form-group">
+                  <label>Nomor WhatsApp</label>
+                  <input type="tel" id="inputBlokKontak" class="input-control" placeholder="08xxxxxxxxxx">
+                </div>
+                <div class="form-group">
+                  <label>Status Hunian</label>
+                  <select id="selectBlokKeterangan" class="input-control">
+                    <option value="Warga Tetap">Warga Tetap</option>
+                    <option value="Warga Kontrak">Warga Kontrak</option>
+                    <option value="Pengurus RT/RW">Pengurus RT/RW</option>
+                    <option value="Rumah Kosong">Rumah Kosong / Renovasi</option>
+                  </select>
+                </div>
+                <div style="display:flex; gap:8px;">
+                  <button type="submit" class="btn btn-primary btn-block" id="btnSaveBlok">Simpan Kavling</button>
+                  <button type="button" class="btn btn-secondary btn-sm" onclick="resetBlokForm()">Batal</button>
+                </div>
+              </form>
+            </div>
+
+            <div>
+              <div class="search-box" style="margin-bottom:10px;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                <input type="text" id="searchBlokInput" class="input-control" placeholder="Cari nomor blok atau nama penghuni..." oninput="filterMasterBlokDisplay()">
+              </div>
+              <div id="masterBlokListContainer" style="max-height:360px; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TAB 2: AUDIT TRAIL LOG -->
+        <div id="tabAudit" class="tab-content">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+            <p style="font-size:0.8rem; color:var(--text-muted);">Riwayat jejak digital aktivitas pengurus dan satpam (keamanan internal):</p>
+            <button class="btn btn-secondary btn-sm" onclick="loadAuditLogs()">🔄 Segarkan Log</button>
+          </div>
+          <div class="audit-table-wrapper">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Aksi</th>
+                  <th>Target</th>
+                  <th>Detail Perubahan</th>
+                  <th>Petugas</th>
+                </tr>
+              </thead>
+              <tbody id="auditLogTbody">
+                <tr><td colspan="5" style="text-align:center; color:var(--text-dim);">Memuat catatan audit...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TAB 3: EKSPOR LAPORAN KUNJUNGAN -->
+        <div id="tabEkspor" class="tab-content">
+          <div style="background:var(--bg-card); padding:18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); max-width:620px; margin:0 auto;">
+            <h4 style="font-size:0.95rem; margin-bottom:12px; color:#fff;">Filter &amp; Download Laporan Kunjungan (CSV / Excel)</h4>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Tanggal Mulai</label>
+                <input type="date" id="exportStartDate" class="input-control">
+              </div>
+              <div class="form-group">
+                <label>Tanggal Selesai</label>
+                <input type="date" id="exportEndDate" class="input-control">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label>Kategori Keperluan</label>
+                <select id="exportKeperluan" class="input-control">
+                  <option value="SEMUA">Semua Keperluan</option>
+                  <option value="Tamu Warga">Tamu Warga</option>
+                  <option value="Kurir Paket">Kurir Paket</option>
+                  <option value="Ojol">Ojol</option>
+                  <option value="Teknisi/Tukang">Teknisi / Tukang</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Status Kunjungan</label>
+                <select id="exportStatus" class="input-control">
+                  <option value="SEMUA">Semua Status</option>
+                  <option value="MASUK">Masih di Dalam</option>
+                  <option value="SELESAI">Selesai (Sudah Keluar)</option>
+                </select>
+              </div>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="executeExportVisitData()" id="btnDownloadExport">
+              📥 Unduh Laporan (.CSV)
+            </button>
+          </div>
+        </div>
+
+        <!-- TAB 4: PENGATURAN GATEWAY & DARURAT -->
+        <div id="tabConfig" class="tab-content">
+          <div style="background:var(--bg-card); padding:18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle); max-width:620px; margin:0 auto;">
+            <h4 style="font-size:0.95rem; margin-bottom:14px; color:#fff;">Integrasi WhatsApp Gateway, API Endpoint &amp; Darurat</h4>
+            
+            <form onsubmit="event.preventDefault(); submitSaveConfig();">
+              <div class="form-group">
+                <label>Google Apps Script API Endpoint (Untuk GitHub Pages)</label>
+                <input type="url" id="cfgGasApiUrl" class="input-control" placeholder="https://script.google.com/macros/s/.../exec">
+                <span style="font-size:0.7rem; color:var(--text-dim);">Masukkan Web App Exec URL hasil Deployment Apps Script untuk menyinkronkan data GitHub Pages ke Google Sheets.</span>
+              </div>
+
+              <div class="form-group">
+                <label>WhatsApp Gateway Webhook URL</label>
+                <input type="url" id="cfgWaUrl" class="input-control" placeholder="https://api.fonnte.com/send">
+                <span style="font-size:0.7rem; color:var(--text-dim);">URL endpoint API WhatsApp gateway untuk kirim konfirmasi ke nomor pemilik rumah.</span>
+              </div>
+
+              <div class="form-group">
+                <label>WhatsApp API Token / Secret</label>
+                <input type="password" id="cfgWaToken" class="input-control" placeholder="Token Otorisasi API">
+              </div>
+
+              <div class="form-group">
+                <label>Nomor HP Broadcast Darurat SOS (Pisahkan dengan koma)</label>
+                <input type="text" id="cfgEmergencyNumbers" class="input-control" placeholder="Contoh: 081234567890, 081299887766">
+                <span style="font-size:0.7rem; color:var(--text-dim);">Nomor satpam/ketua RT yang langsung menerima siaran darurat otomatis saat warga memicu SOS.</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label>Toleransi Overstay (Jam)</label>
+                  <input type="number" id="cfgOverstay" class="input-control" min="1" max="24" value="4">
+                </div>
+                <div class="form-group">
+                  <label>Masa Berlaku Default QR Pas (Jam)</label>
+                  <input type="number" id="cfgQrExpire" class="input-control" min="1" max="48" value="12">
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block" id="btnSaveConfig">Simpan Pengaturan</button>
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="qrGenModal">
+    <div class="modal-content" style="max-width: 480px;">
+      <div class="modal-header">
+        <h3 class="modal-title">🎫 Buat Pas Tamu Sementara (QR Code)</h3>
+        <button class="modal-close" onclick="closeQrGenModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">
+          Generate kode QR undangan tamu sementara dengan masa aktif terbatas untuk validasi kilat 1 detik di pos satpam.
+        </p>
+
+        <form id="qrPassForm" onsubmit="event.preventDefault(); generateVisitorPassQr();">
+          <div class="form-group">
+            <label>Nama Tamu / Teknisi <span class="req">*</span></label>
+            <input type="text" id="qrTamuNama" class="input-control" placeholder="Contoh: Keluarga Hendra" required>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Blok Tujuan <span class="req">*</span></label>
+              <input type="text" id="qrBlokTujuan" class="input-control" placeholder="Contoh: Blok B-05" list="masterBlokList" required>
+            </div>
+            <div class="form-group">
+              <label>Masa Berlaku</label>
+              <select id="qrExpireOption" class="input-control">
+                <option value="6">6 Jam</option>
+                <option value="12" selected>12 Jam (Standar)</option>
+                <option value="24">24 Jam (1 Hari)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label>Plat Nomor (Opsional)</label>
+              <input type="text" id="qrPlatNomor" class="input-control input-plate" placeholder="D 1234 XY">
+            </div>
+            <div class="form-group">
+              <label>Keperluan</label>
+              <select id="qrKeperluan" class="input-control">
+                <option value="Tamu Warga">Tamu Warga</option>
+                <option value="Teknisi/Tukang">Teknisi/Tukang</option>
+                <option value="Kurir Paket">Kurir/Ekspedisi</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Generate QR Pas Tamu</button>
+        </form>
+
+        <div id="qrResultArea" style="display:none; text-align:center; margin-top:16px;">
+          <div style="font-size:0.85rem; font-weight:700; color:var(--accent-neon); margin-bottom:6px;">KODE QR UNDANGAN TAMU</div>
+          <div class="qr-preview-box">
+            <img id="qrImageTag" src="" alt="QR Code Pas Tamu">
+          </div>
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:10px;" id="qrExpireTextInfo">-</div>
+          <button class="btn btn-secondary btn-block" onclick="shareQrViaWhatsApp()">
+            📲 Bagikan via WhatsApp
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="sosResidentModal">
+    <div class="modal-content" style="max-width: 440px;">
+      <div class="modal-header">
+        <h3 class="modal-title" style="color:#ef4444;">🚨 Panggilan Darurat Warga</h3>
+        <button class="modal-close" onclick="closeSosResidentModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="text-align:center;">
+        <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
+          Tekan tombol di bawah untuk membunyikan alarm sirene darurat di layar pos satpam secara langsung &amp; kirim broadcast WhatsApp!
+        </p>
+
+        <div class="form-group" style="text-align:left;">
+          <label>Kavling / Rumah Anda <span class="req">*</span></label>
+          <input type="text" id="sosBlokRumah" class="input-control" placeholder="Pilih Blok Rumah" list="masterBlokList" required>
+        </div>
+
+        <div class="form-group" style="text-align:left;">
+          <label>Kategori Kejadian</label>
+          <select id="sosKategori" class="input-control">
+            <option value="Keamanan / Penyusup">🚨 Keamanan / Penyusup / Keributan</option>
+            <option value="Medis / Ambulans">🩺 Medis / Darurat Kesehatan</option>
+            <option value="Kebakaran / Gas">🔥 Kebakaran / Kebocoran Gas</option>
+            <option value="Lainnya">⚠️ Darurat Lainnya</option>
+          </select>
+        </div>
+
+        <div class="panic-button-circle" onclick="triggerPanicSignal()">
+          SOS
+        </div>
+
+        <span style="font-size:0.72rem; color:var(--text-dim);">Sentuh tombol SOS untuk memicu sirine darurat seketika ke pos jaga.</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="emergency-strobe-overlay" id="emergencyStrobeOverlay">
+    <div class="emergency-box">
+      <h2>🚨 SINYAL DARURAT WARGA AKTIF!</h2>
+      <p style="font-size:1.1rem; margin-bottom:12px;">Pos Satpam The Green Walini - Respon Cepat Diperlukan Segera!</p>
+      
+      <div style="background:rgba(255,255,255,0.08); padding:16px; border-radius:var(--radius-md); text-align:left; margin-bottom:20px; font-size:0.95rem;">
+        <div>📍 <strong>LOKASI:</strong> <span id="emgBlokVal" style="color:var(--accent-neon); font-size:1.2rem;">-</span></div>
+        <div>👤 <strong>PENGHUNI:</strong> <span id="emgPenghuniVal">-</span></div>
+        <div>📞 <strong>KONTAK:</strong> <span id="emgKontakVal">-</span></div>
+        <div>⚠️ <strong>KATEGORI:</strong> <span id="emgKategoriVal" style="color:#f87171; font-weight:bold;">-</span></div>
+        <div>⏱️ <strong>WAKTU:</strong> <span id="emgWaktuVal">-</span></div>
+      </div>
+
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn btn-secondary" onclick="stopSirenAudioOnly()">🔇 Matikan Suara Sirine</button>
+        <button class="btn btn-primary" onclick="resolveEmergencyNow()">✅ Selesaikan Darurat &amp; Catat Log</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-backdrop" id="shiftModal">
+    <div class="modal-content" style="max-width: 520px;">
+      <div class="modal-header">
+        <h3 class="modal-title">📋 Lembar Serah Terima Shift Jaga</h3>
+        <button class="modal-close" onclick="closeShiftModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div style="background:#fff; color:#0f172a; padding:18px; border-radius:var(--radius-sm); font-family:'JetBrains Mono', monospace; font-size:0.8rem;" id="handoverPrintArea">
+          <h3 style="text-align:center; border-bottom:2px dashed #0f172a; padding-bottom:6px; margin-bottom:10px;">THE GREEN WALINI</h3>
+          <div style="text-align:center; font-weight:bold; margin-bottom:10px;">REKAPITULASI BUKU TAMU POS SATPAM</div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;"><span>TANGGAL:</span><span id="rptDate">-</span></div>
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>WAKTU CETAK:</span><span id="rptTime">-</span></div>
+          <div style="border-top:1px dashed #64748b; margin:8px 0;"></div>
+          <div style="display:flex; justify-content:space-between;"><span>TOTAL MASUK:</span><strong id="rptTotalMasuk">0</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>SUDAH KELUAR:</span><span id="rptTotalKeluar">0</span></div>
+          <div style="display:flex; justify-content:space-between;"><span>MASIH DI DALAM:</span><strong id="rptTotalAktif" style="color:#059669;">0</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>PERINGATAN OVERSTAY:</span><strong id="rptTotalOverstay" style="color:#dc2626;">0</strong></div>
+          <div style="border-top:1px dashed #64748b; margin:8px 0;"></div>
+          <div style="font-weight:bold; margin-bottom:4px;">RINCIAN KEPERLUAN:</div>
+          <div id="rptKeperluanBreakdown"></div>
+          <div style="border-top:1px dashed #64748b; margin:8px 0;"></div>
+          <div style="font-weight:bold; margin-bottom:4px;">TAMU AKTIF / BELUM KELUAR:</div>
+          <div id="rptActiveGuestsList"></div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+          <button class="btn btn-secondary" onclick="closeShiftModal()">Tutup</button>
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak Rekap</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-container" id="toastContainer"></div>
+
+  <script>
+    var state = {
+      currentPage: 1,
+      itemsPerPage: 10,
+      totalPages: 1,
+      totalCount: 0,
+      activeFilter: 'SEMUA',
+      searchDebounceTimer: null,
+      masterBlokList: [],
+      isAdminAuthenticated: false,
+      activeEmergencyId: null,
+      lastAlertedEmergencyId: null,
+      sirenOscillator: null,
+      sirenAudioContext: null,
+      lastGeneratedQrString: '',
+      wakeLockSentinel: null,
+      html5QrCodeInstance: null,
+      deferredPwaPrompt: null
+    };
+
+    var previewDummyData = [
+      { id: 'VST-20261021-0001', tanggal: '21/10/2026', jamMasuk: '07:15:00', jamKeluar: '-', durasi: '04 jam 20 menit', namaTamu: 'Agus Teknisi Indihome', noKontak: '081299887766', platNomor: 'D 1982 ABC', jenisKendaraan: 'Motor', blokTujuan: 'Blok B-05', keperluan: 'Teknisi/Tukang', status: 'MASUK', isOverstay: 'YA', catatan: 'Perbaikan sambungan kabel' },
+      { id: 'VST-20261021-0002', tanggal: '21/10/2026', jamMasuk: '08:30:00', jamKeluar: '08:45:10', durasi: '15 menit', namaTamu: 'Rudi (SiCepat Express)', noKontak: '085611223344', platNomor: 'B 6543 PO', jenisKendaraan: 'Motor', blokTujuan: 'Blok A-02', keperluan: 'Kurir Paket', status: 'SELESAI', isOverstay: 'TIDAK', catatan: 'Paket di teras' },
+      { id: 'VST-20261021-0003', tanggal: '21/10/2026', jamMasuk: '10:05:00', jamKeluar: '-', durasi: '01 jam 30 menit', namaTamu: 'Keluarga H. Mulyadi', noKontak: '081344556677', platNomor: 'D 1455 KLP', jenisKendaraan: 'Mobil', blokTujuan: 'Blok C-12', keperluan: 'Tamu Warga', status: 'MASUK', isOverstay: 'TIDAK', catatan: 'Silaturahmi' }
+    ];
+
+    var previewMasterBlok = [
+      { blok: 'Blok A-01', penghuni: 'Bpk. Gunawan Wibisono', kontak: '081234567890', keterangan: 'Ketua RT 01' },
+      { blok: 'Blok A-02', penghuni: 'Ibu Ratna Paramitha', kontak: '081398765432', keterangan: 'Warga Tetap' },
+      { blok: 'Blok B-05', penghuni: 'Bpk. Aditya Pratama', kontak: '085712349876', keterangan: 'Warga Tetap' },
+      { blok: 'Blok B-08', penghuni: 'Ibu Maya Septiani', kontak: '082155443322', keterangan: 'Warga Tetap' },
+      { blok: 'Blok C-12', penghuni: 'Bpk. Hendra Saputra', kontak: '087844332211', keterangan: 'Koordinator Lingkungan' },
+      { blok: 'Blok D-03', penghuni: 'Bpk. Dr. Syaiful Anwar', kontak: '081122334455', keterangan: 'Dokter Komplek' }
+    ];
+
+    window.addEventListener('DOMContentLoaded', function() {
+      initClock();
+      initPwaInstaller();
+      fetchGuests(1);
+      loadMasterBlok();
+      startEmergencyWatcher();
+      initScreenWakeLock();
+      requestNotificationPermissionSilently();
+    });
+
+    function initPwaInstaller() {
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        state.deferredPwaPrompt = e;
+        var btn = document.getElementById('btnInstallPwa');
+        if (btn) btn.style.display = 'inline-flex';
+      });
+
+      window.addEventListener('appinstalled', function() {
+        showToast('✅ Aplikasi Pos Walini berhasil dipasang di layar utama!', 'success');
+        var btn = document.getElementById('btnInstallPwa');
+        if (btn) btn.style.display = 'none';
+        state.deferredPwaPrompt = null;
+      });
+    }
+
+    function triggerPwaInstall() {
+      if (state.deferredPwaPrompt) {
+        state.deferredPwaPrompt.prompt();
+        state.deferredPwaPrompt.userChoice.then(function(choiceResult) {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User menerima pemasangan PWA');
+          }
+          state.deferredPwaPrompt = null;
+        });
+      } else {
+        showToast('Pilih menu titik tiga (⋮) di browser lalu pilih "Tambahkan ke Layar Utama"', 'warning');
+      }
+    }
+
+    function initScreenWakeLock() {
+
+    function triggerPwaInstallation() {
+      if (!state.deferredPwaPrompt) {
+        showToast('Gunakan menu browser: Tambahkan ke Layar Utama / Install', 'warning');
+        return;
+      }
+      state.deferredPwaPrompt.prompt();
+      state.deferredPwaPrompt.userChoice.then(function(choice) {
+        if (choice.outcome === 'accepted') {
+          showToast('Menginstall aplikasi ke layar tablet/HP...', 'success');
+        }
+        state.deferredPwaPrompt = null;
+      });
+    }
+
+    function requestBackend(actionName, payload, successCallback, errorCallback) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        // Mode Native Google Apps Script
+        var runner = google.script.run.withSuccessHandler(successCallback);
+        if (errorCallback) runner = runner.withFailureHandler(errorCallback);
+        if (typeof runner[actionName] === 'function') {
+          runner[actionName](payload);
+        } else {
+          console.warn('Fungsi backend tidak ditemukan:', actionName);
+        }
+      } else if (state.gasApiUrl) {
+        // Mode GitHub Pages REST API
+        fetch(state.gasApiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: actionName, payload: payload })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (successCallback) successCallback(data);
+        })
+        .catch(function(err) {
+          console.error('API Error:', err);
+          if (errorCallback) errorCallback(err);
+        });
+      } else {
+        // Mode Simulasi Lokal / Demo Preview
+        if (successCallback) successCallback(null);
+      }
+    }
+
+    function requestNotificationPermissionSilently() {
+      if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(function(perm) {
+          console.log('Notification permission:', perm);
+        });
+      }
+    }
+
+    function testNotificationAndSiren() {
+      if ('Notification' in window) {
+        Notification.requestPermission().then(function(perm) {
+          if (perm === 'granted') {
+            new Notification('🚨 TES NOTIFIKASI POS SATPAM WALINI', {
+              body: 'Sistem notifikasi background darurat aktif normal!',
+              icon: 'https://placehold.co/128x128/ef4444/ffffff?text=SOS'
+            });
+            showToast('✅ Izin Notifikasi Sistem: AKTIF & BERFUNGSI', 'success');
+          } else {
+            showToast('⚠️ Izin notifikasi browser belum diberikan', 'warning');
+          }
+        });
+      }
+      playScanBeepSound();
+      triggerHapticFeedback();
+    }
+
+    function initClock() {
+      function update() {
+        var now = new Date();
+        var h = ('0' + now.getHours()).slice(-2);
+        var m = ('0' + now.getMinutes()).slice(-2);
+        var s = ('0' + now.getSeconds()).slice(-2);
+        document.getElementById('tickerClock').innerText = h + ':' + m + ':' + s;
+        var options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+        document.getElementById('tickerDate').innerText = now.toLocaleDateString('id-ID', options);
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
+    function fetchGuests(page) {
+      if (typeof page === 'number') state.currentPage = page;
+      var keyword = document.getElementById('searchKeyword').value;
+      
+      var params = {
+        page: state.currentPage,
+        limit: state.itemsPerPage,
+        search: keyword,
+        status: state.activeFilter
+      };
+
+      requestBackend('getGuests', params, function(res) {
+        if (res && res.success) {
+          renderGuestCards(res.list);
+          updatePagination(res.page, res.totalPages, res.total);
+          updateStats(res.summary);
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          renderGuestCards(previewDummyData);
+          updatePagination(1, 1, previewDummyData.length);
+          updateStats({ totalTamuHariIni: 3, tamuAktif: 2, tamuOverstay: 1, tamuSelesai: 1 });
+        } else {
+          showToast((res && res.error) || 'Gagal memuat data tamu', 'error');
+        }
+      });
+    }
+          })
+          .getGuests(params);
+      } else {
+        renderGuestCards(previewDummyData);
+        updatePagination(1, 1, previewDummyData.length);
+        updateStats({
+          totalTamuHariIni: 3,
+          tamuAktif: 2,
+          tamuOverstay: 1,
+          tamuSelesai: 1
+        });
+      }
+    }
+
+    function renderGuestCards(list) {
+      var container = document.getElementById('guestListContainer');
+      if (!list || list.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted);">Tidak ada catatan tamu yang sesuai.</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < list.length; i++) {
+        var g = list[i];
+        var isMasuk = (g.status === 'MASUK');
+        var isOverstay = (g.isOverstay === 'YA');
+        var cardClass = 'guest-card' + (isOverstay && isMasuk ? ' is-overstay' : '');
+        
+        var statusBadge = '';
+        if (isMasuk) {
+          statusBadge = isOverstay ? '<span class="badge-status badge-overstay">⚠️ OVERSTAY</span>' : '<span class="badge-status badge-masuk">🟢 DI DALAM</span>';
+        } else {
+          statusBadge = '<span class="badge-status badge-selesai">🏁 SELESAI</span>';
+        }
+
+        var actionBtn = '';
+        if (isMasuk) {
+          actionBtn = '<button class="btn btn-danger btn-sm" onclick="handleCheckOut(\'' + escapeHtml(g.id) + '\')">Check-Out</button>';
+        } else {
+          actionBtn = '<span style="font-size:0.75rem; color:var(--text-dim);">Keluar: ' + escapeHtml(g.jamKeluar) + '</span>';
+        }
+
+        html += 
+          '<div class="' + cardClass + '" id="card-' + escapeHtml(g.id) + '">' +
+            '<div class="card-top">' +
+              '<div style="display:flex; align-items:center; gap:8px;">' +
+                '<span class="plate-badge">' + escapeHtml(g.platNomor) + '</span>' +
+                '<strong style="color:#fff; font-size:0.95rem;">' + escapeHtml(g.namaTamu) + '</strong>' +
+                '<span style="font-size:0.75rem; color:var(--text-muted);">&bull; ' + escapeHtml(g.jenisKendaraan) + '</span>' +
+              '</div>' +
+              '<div>' + statusBadge + '</div>' +
+            '</div>' +
+            '<div class="card-details">' +
+              '<div><span style="color:var(--text-dim); display:block; font-size:0.68rem;">Tujuan</span><strong>' + escapeHtml(g.blokTujuan) + '</strong></div>' +
+              '<div><span style="color:var(--text-dim); display:block; font-size:0.68rem;">Keperluan</span><strong>' + escapeHtml(g.keperluan) + '</strong></div>' +
+              '<div><span style="color:var(--text-dim); display:block; font-size:0.68rem;">Jam Masuk</span><strong>' + escapeHtml(g.jamMasuk) + '</strong></div>' +
+              '<div><span style="color:var(--text-dim); display:block; font-size:0.68rem;">Kontak</span><strong>' + (g.noKontak ? escapeHtml(g.noKontak) : '-') + '</strong></div>' +
+            '</div>' +
+            (g.catatan ? '<div style="font-size:0.72rem; color:var(--text-muted); font-style:italic;">Catatan: ' + escapeHtml(g.catatan) + '</div>' : '') +
+            '<div class="card-footer">' +
+              '<div class="duration-indicator"><span>Durasi: ' + escapeHtml(g.durasi) + '</span></div>' +
+              '<div>' + actionBtn + '</div>' +
+            '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function submitCheckIn(customPayload) {
+      var payload = customPayload || {
+        namaTamu: document.getElementById('inputNama').value.trim(),
+        platNomor: document.getElementById('inputPlat').value.trim().toUpperCase(),
+        blokTujuan: document.getElementById('inputBlok').value.trim(),
+        noKontak: document.getElementById('inputKontak').value.trim(),
+        jenisKendaraan: document.getElementById('selectKendaraan').value,
+        keperluan: document.getElementById('selectKeperluan').value,
+        catatan: document.getElementById('inputCatatan').value.trim()
+      };
+
+      if (!payload.namaTamu || !payload.platNomor || !payload.blokTujuan) {
+        showToast('Lengkapi Nama, Plat Nomor, dan Blok Tujuan', 'warning');
+        return;
+      }
+
+      var btn = document.getElementById('btnSubmit');
+      btn.disabled = true;
+      btn.innerText = 'Menyimpan...';
+
+      requestBackend('checkInGuest', payload, function(res) {
+        btn.disabled = false;
+        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg> Catat Tamu Masuk (Check-In)';
+        if (res && res.success) {
+          showToast('Check-In berhasil! Notifikasi WA diteruskan ke warga.', 'success');
+          document.getElementById('checkInForm').reset();
+          fetchGuests(1);
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          previewDummyData.unshift({
+            id: 'VST-20261021-000' + (previewDummyData.length + 1),
+            tanggal: '21/10/2026',
+            jamMasuk: 'Baru saja',
+            jamKeluar: '-',
+            durasi: '0 menit',
+            namaTamu: payload.namaTamu,
+            noKontak: payload.noKontak,
+            platNomor: payload.platNomor,
+            jenisKendaraan: payload.jenisKendaraan,
+            blokTujuan: payload.blokTujuan,
+            keperluan: payload.keperluan,
+            status: 'MASUK',
+            isOverstay: 'TIDAK',
+            catatan: payload.catatan
+          });
+          document.getElementById('checkInForm').reset();
+          showToast('[GitHub / Preview] Tamu berhasil di-check in!', 'success');
+          fetchGuests(1);
+        } else {
+          showToast((res && res.error) || 'Gagal menyimpan check-in', 'error');
+        }
+      });
+    }
+
+    function handleCheckOut(visitId) {
+      requestBackend('checkOutGuest', visitId, function(res) {
+        if (res && res.success) {
+          showToast('Check-Out selesai', 'success');
+          fetchGuests();
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          for (var i = 0; i < previewDummyData.length; i++) {
+            if (previewDummyData[i].id === visitId) {
+              previewDummyData[i].status = 'SELESAI';
+              previewDummyData[i].jamKeluar = 'Baru saja';
+              break;
+            }
+          }
+          showToast('[GitHub / Preview] Tamu telah keluar', 'success');
+          fetchGuests();
+        } else {
+          showToast((res && res.error) || 'Gagal check-out', 'error');
+        }
+      });
+    }
+
+    function openQrScanModal() {
+      document.getElementById('qrScanModal').classList.add('show');
+      document.getElementById('inputQrRawData').value = '';
+      document.getElementById('qrScanResultAlert').style.display = 'none';
+      document.getElementById('qrManualArea').style.display = 'none';
+      startLiveCameraStream();
+    }
+
+    function closeQrScanModal() {
+      stopLiveCameraStream();
+      document.getElementById('qrScanModal').classList.remove('show');
+    }
+
+    function startLiveCameraStream() {
+      try {
+        if (!state.html5QrCodeInstance) {
+          state.html5QrCodeInstance = new Html5Qrcode('qrLiveReaderNode');
+        }
+
+        var config = {
+          fps: 15,
+          qrbox: { width: 220, height: 220 },
+          aspectRatio: 1.0
+        };
+
+        state.html5QrCodeInstance.start(
+          { facingMode: state.currentCameraFacing },
+          config,
+          function(decodedText) {
+            playScanBeepSound();
+            triggerHapticFeedback();
+            showToast('✅ Pas Tamu Berhasil Dipindai!', 'success');
+            stopLiveCameraStream();
+            processScannedQrData(decodedText);
+          },
+          function(errorMessage) {
+            // scan failure / seeking - ignore
+          }
+        ).catch(function(err) {
+          console.warn('Live camera stream notice:', err);
+          document.getElementById('qrLiveReaderNode').innerHTML = 
+            '<div style="padding:40px 16px; color:var(--text-muted); font-size:0.8rem;">' +
+              'Gunakan tombol <strong>📸 Jepret Native</strong> di bawah untuk memindai via kamera gadget Anda.' +
+            '</div>';
+        });
+      } catch (e) {
+        console.warn('Scanner init error:', e);
+      }
+    }
+
+    function stopLiveCameraStream() {
+      if (state.html5QrCodeInstance) {
+        state.html5QrCodeInstance.stop().then(function() {
+          state.html5QrCodeInstance.clear();
+        }).catch(function() {});
+      }
+      state.isTorchOn = false;
+      var tBtn = document.getElementById('btnTorchFlash');
+      if (tBtn) tBtn.innerText = '🔦 Senter: OFF';
+    }
+
+    function toggleSwitchCamera() {
+      state.currentCameraFacing = (state.currentCameraFacing === 'environment') ? 'user' : 'environment';
+      if (state.html5QrCodeInstance) {
+        state.html5QrCodeInstance.stop().then(function() {
+          startLiveCameraStream();
+        }).catch(function() {
+          startLiveCameraStream();
+        });
+      }
+    }
+
+    function toggleTorchFlash() {
+      if (!state.html5QrCodeInstance) return;
+      state.isTorchOn = !state.isTorchOn;
+      try {
+        state.html5QrCodeInstance.applyVideoConstraints({
+          advanced: [{ torch: state.isTorchOn }]
+        }).then(function() {
+          document.getElementById('btnTorchFlash').innerText = state.isTorchOn ? '🔦 Senter: ON' : '🔦 Senter: OFF';
+        }).catch(function() {
+          showToast('Lampu senter tidak didukung pada sensor kamera ini', 'warning');
+          state.isTorchOn = false;
+        });
+      } catch (e) {
+        showToast('Fitur senter tidak tersedia', 'warning');
+      }
+    }
+
+    function triggerNativeCameraScan() {
+      var fileInput = document.getElementById('qrNativeFileInput');
+      if (fileInput) fileInput.click();
+    }
+
+    function handleNativeQrCapture(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!state.html5QrCodeInstance) {
+        state.html5QrCodeInstance = new Html5Qrcode('qrLiveReaderNode');
+      }
+
+      state.html5QrCodeInstance.scanFile(file, true)
+        .then(function(decodedText) {
+          playScanBeepSound();
+          triggerHapticFeedback();
+          showToast('✅ Pas Tamu Berhasil Dipindai!', 'success');
+          stopLiveCameraStream();
+          processScannedQrData(decodedText);
+        })
+        .catch(function(err) {
+          showToast('Kode QR tidak terdeteksi dalam foto. Mohon foto lebih dekat.', 'error');
+        });
+
+      event.target.value = '';
+    }
+
+    function toggleManualQrInput() {
+      var area = document.getElementById('qrManualArea');
+      area.style.display = (area.style.display === 'none' || !area.style.display) ? 'block' : 'none';
+    }
+
+    function processScannedQrData(scannedContent) {
+      var raw = scannedContent || document.getElementById('inputQrRawData').value.trim();
+      if (!raw) {
+        showToast('Tempel atau masukkan data kode QR terlebih dahulu', 'warning');
+        return;
+      }
+
+      var alertBox = document.getElementById('qrScanResultAlert');
+
+      requestBackend('validateQrVisitorPass', raw, function(res) {
+        if (res && res.success) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+          alertBox.style.color = '#34d399';
+          alertBox.innerText = '✅ PAS TAMU VALID! Memproses Check-In otomatis...';
+          
+          setTimeout(function() {
+            closeQrScanModal();
+            submitCheckIn(res.data);
+          }, 600);
+        } else if (res && res.isExpired) {
+          alertBox.style.display = 'block';
+          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+          alertBox.style.color = '#fca5a5';
+          alertBox.innerText = '❌ ' + res.error;
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          try {
+            var d = JSON.parse(raw);
+            if (Date.now() > d.expiresAt) {
+              alertBox.style.display = 'block';
+              alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+              alertBox.style.color = '#fca5a5';
+              alertBox.innerText = '❌ KODE QR TELAH KADALUARSA!';
+            } else {
+              alertBox.style.display = 'block';
+              alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+              alertBox.style.color = '#34d399';
+              alertBox.innerText = '✅ [Preview] QR Valid! Memproses Check-In...';
+              setTimeout(function() {
+                closeQrScanModal();
+                submitCheckIn({
+                  namaTamu: d.namaTamu,
+                  platNomor: d.platNomor || 'D 9999 DEMO',
+                  blokTujuan: d.blokTujuan,
+                  noKontak: '',
+                  jenisKendaraan: 'Mobil',
+                  keperluan: d.keperluan || 'Tamu Warga',
+                  catatan: 'Validasi QR Pas Sukses'
+                });
+              }, 600);
+            }
+          } catch (e) {
+            showToast('Format QR tidak sesuai', 'error');
+          }
+        } else {
+          showToast((res && res.error) || 'Format QR salah', 'error');
+        }
+      });
+    }
+          })
+          .checkInGuest(payload);
+      } else {
+        setTimeout(function() {
+          btn.disabled = false;
+          btn.innerHTML = 'Catat Tamu Masuk (Check-In)';
+          previewDummyData.unshift({
+            id: 'VST-20261021-000' + (previewDummyData.length + 1),
+            tanggal: '21/10/2026',
+            jamMasuk: 'Baru saja',
+            jamKeluar: '-',
+            durasi: '0 menit',
+            namaTamu: payload.namaTamu,
+            noKontak: payload.noKontak,
+            platNomor: payload.platNomor,
+            jenisKendaraan: payload.jenisKendaraan,
+            blokTujuan: payload.blokTujuan,
+            keperluan: payload.keperluan,
+            status: 'MASUK',
+            isOverstay: 'TIDAK',
+            catatan: payload.catatan
+          });
+          document.getElementById('checkInForm').reset();
+          showToast('[Preview] Tamu berhasil di-check in!', 'success');
+          fetchGuests(1);
+        }, 250);
+      }
+    }
+
+    function handleCheckOut(visitId) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              showToast('Check-Out selesai', 'success');
+              fetchGuests();
+            } else {
+              showToast((res && res.error) || 'Gagal check-out', 'error');
+            }
+          })
+          .checkOutGuest(visitId);
+      } else {
+        for (var i = 0; i < previewDummyData.length; i++) {
+          if (previewDummyData[i].id === visitId) {
+            previewDummyData[i].status = 'SELESAI';
+            previewDummyData[i].jamKeluar = 'Baru saja';
+            break;
+          }
+        }
+        showToast('[Preview] Tamu telah keluar', 'success');
+        fetchGuests();
+      }
+    }
+
+    function playScanBeepSound() {
+      try {
+        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        var osc = audioCtx.createOscillator();
+        var gain = audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(1050, audioCtx.currentTime);
+        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.13);
+      } catch (e) {
+        console.warn('Audio Beep Error:', e);
+      }
+    }
+
+    function triggerHapticFeedback() {
+      try {
+        if ('vibrate' in navigator) {
+          navigator.vibrate(100);
+        }
+      } catch (e) {
+        console.warn('Haptic Vibration Error:', e);
+      }
+    }
+
+    function openQrScanModal() {
+      document.getElementById('qrScanModal').classList.add('show');
+      document.getElementById('inputQrRawData').value = '';
+      document.getElementById('qrScanResultAlert').style.display = 'none';
+      document.getElementById('qrManualArea').style.display = 'none';
+    }
+
+    function closeQrScanModal() {
+      document.getElementById('qrScanModal').classList.remove('show');
+    }
+
+    function triggerNativeCameraScan() {
+      var fileInput = document.getElementById('qrNativeFileInput');
+      if (fileInput) fileInput.click();
+    }
+
+    function handleNativeQrCapture(event) {
+      var file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      var btn = document.getElementById('btnTriggerCameraHero');
+      var originalText = btn.innerText;
+      btn.innerText = 'Memindai Foto QR...';
+      btn.disabled = true;
+
+      if (!state.html5QrCodeInstance) {
+        var dummyDiv = document.createElement('div');
+        dummyDiv.id = 'dummyQrReaderNode';
+        dummyDiv.style.display = 'none';
+        document.body.appendChild(dummyDiv);
+        state.html5QrCodeInstance = new Html5Qrcode('dummyQrReaderNode');
+      }
+
+      state.html5QrCodeInstance.scanFile(file, true)
+        .then(function(decodedText) {
+          btn.innerText = originalText;
+          btn.disabled = false;
+          playScanBeepSound();
+          triggerHapticFeedback();
+          showToast('✅ QR Pas Tamu Berhasil Dipindai!', 'success');
+          processScannedQrData(decodedText);
+        })
+        .catch(function(err) {
+          btn.innerText = originalText;
+          btn.disabled = false;
+          showToast('Kode QR tidak terdeteksi dalam foto. Mohon foto lebih dekat dan tidak buram.', 'error');
+        });
+
+      event.target.value = '';
+    }
+
+    function toggleManualQrInput() {
+      var area = document.getElementById('qrManualArea');
+      area.style.display = (area.style.display === 'none' || !area.style.display) ? 'block' : 'none';
+    }
+
+    function processScannedQrData(scannedContent) {
+      var raw = scannedContent || document.getElementById('inputQrRawData').value.trim();
+      if (!raw) {
+        showToast('Tempel atau masukkan data kode QR terlebih dahulu', 'warning');
+        return;
+      }
+
+      var alertBox = document.getElementById('qrScanResultAlert');
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              alertBox.style.display = 'block';
+              alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+              alertBox.style.color = '#34d399';
+              alertBox.innerText = '✅ PAS TAMU VALID! Memproses Check-In otomatis...';
+              
+              setTimeout(function() {
+                closeQrScanModal();
+                submitCheckIn(res.data);
+              }, 700);
+            } else if (res && res.isExpired) {
+              alertBox.style.display = 'block';
+              alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+              alertBox.style.color = '#fca5a5';
+              alertBox.innerText = '❌ ' + res.error;
+            } else {
+              showToast((res && res.error) || 'Format QR salah', 'error');
+            }
+          })
+          .validateQrVisitorPass(raw);
+      } else {
+        try {
+          var d = JSON.parse(raw);
+          if (Date.now() > d.expiresAt) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+            alertBox.style.color = '#fca5a5';
+            alertBox.innerText = '❌ KODE QR TELAH KADALUARSA!';
+          } else {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+            alertBox.style.color = '#34d399';
+            alertBox.innerText = '✅ [Preview] QR Valid! Memproses Check-In...';
+            setTimeout(function() {
+              closeQrScanModal();
+              submitCheckIn({
+                namaTamu: d.namaTamu,
+                platNomor: d.platNomor || 'D 9999 DEMO',
+                blokTujuan: d.blokTujuan,
+                noKontak: '',
+                jenisKendaraan: 'Mobil',
+                keperluan: d.keperluan || 'Tamu Warga',
+                catatan: 'Validasi QR Pas Sukses'
+              });
+            }, 700);
+          }
+        } catch (e) {
+          showToast('Data QR tidak sesuai format digital The Green Walini', 'error');
+        }
+      }
+    }
+
+    function openQrGenModal() { document.getElementById('qrGenModal').classList.add('show'); }
+    function closeQrGenModal() { document.getElementById('qrGenModal').classList.remove('show'); }
+
+    function generateVisitorPassQr() {
+      var hours = parseInt(document.getElementById('qrExpireOption').value, 10) || 12;
+      var now = Date.now();
+      var expireTime = now + (hours * 3600 * 1000);
+      
+      var passPayload = {
+        namaTamu: document.getElementById('qrTamuNama').value.trim(),
+        blokTujuan: document.getElementById('qrBlokTujuan').value.trim(),
+        platNomor: document.getElementById('qrPlatNomor').value.trim().toUpperCase(),
+        keperluan: document.getElementById('qrKeperluan').value,
+        createdAt: now,
+        expiresAt: expireTime
+      };
+
+      var jsonStr = JSON.stringify(passPayload);
+      state.lastGeneratedQrString = jsonStr;
+
+      var qrApiUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=' + encodeURIComponent(jsonStr);
+      document.getElementById('qrImageTag').src = qrApiUrl;
+
+      var expDate = new Date(expireTime);
+      var expStr = expDate.toLocaleDateString('id-ID') + ' pukul ' + ('0' + expDate.getHours()).slice(-2) + ':' + ('0' + expDate.getMinutes()).slice(-2);
+      document.getElementById('qrExpireTextInfo').innerText = 'Berlaku hingga: ' + expStr + ' WIB (' + hours + ' Jam)';
+
+      document.getElementById('qrResultArea').style.display = 'block';
+    }
+
+    function shareQrViaWhatsApp() {
+      var text = 'Halo, berikut adalah Pas Tamu Sementara Digital Anda untuk memasuki Komplek The Green Walini. Harap perlihatkan kode QR ini ke kamera pos satpam saat tiba di gerbang utama.';
+      window.open('https://wa.me/?text=' + encodeURIComponent(text), '_blank');
+    }
+
+    function openAdminPinModal() {
+      if (state.isAdminAuthenticated) {
+        openAdminPanelModal();
+      } else {
+        document.getElementById('inputAdminPin').value = '';
+        document.getElementById('adminPinModal').classList.add('show');
+      }
+    }
+
+    function closeAdminPinModal() {
+      document.getElementById('adminPinModal').classList.remove('show');
+    }
+
+    function verifyPinAndProceed() {
+      var pin = document.getElementById('inputAdminPin').value.trim();
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.authorized) {
+              state.isAdminAuthenticated = true;
+              closeAdminPinModal();
+              openAdminPanelModal();
+            } else {
+              showToast('PIN Admin salah!', 'error');
+            }
+          })
+          .verifyAdminPin(pin);
+      } else {
+        if (pin === '2026') {
+          state.isAdminAuthenticated = true;
+          closeAdminPinModal();
+          openAdminPanelModal();
+        } else {
+          showToast('PIN salah (Demo: 2026)', 'error');
+        }
+      }
+    }
+
+    function openAdminPanelModal() {
+      document.getElementById('adminPanelModal').classList.add('show');
+      switchAdminTab('tabKavling');
+      loadMasterBlok();
+      loadSystemConfig();
+    }
+
+    function closeAdminPanelModal() {
+      document.getElementById('adminPanelModal').classList.remove('show');
+    }
+
+    function switchAdminTab(tabId) {
+      var btns = document.querySelectorAll('.admin-tab-btn');
+      for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+      
+      var tabs = document.querySelectorAll('.tab-content');
+      for (var j = 0; j < tabs.length; j++) tabs[j].classList.remove('active');
+      
+      var targetTab = document.getElementById(tabId);
+      if (targetTab) targetTab.classList.add('active');
+
+      if (tabId === 'tabAudit') loadAuditLogs();
+    }
+
+    function loadAuditLogs() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) renderAuditLogsTable(res.list);
+          })
+          .getAdminAuditLogs(25);
+      } else {
+        renderAuditLogsTable([
+          { waktu: '12:00:00', tanggal: '21/10/2026', aksi: 'SIMPAN_BLOK', targetBlok: 'Blok B-05', detail: 'Update data kontak penghuni', petugas: 'Admin' }
+        ]);
+      }
+    }
+
+    function renderAuditLogsTable(logs) {
+      var tbody = document.getElementById('auditLogTbody');
+      if (!logs || logs.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:16px;">Belum ada catatan aktivitas.</td></tr>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < logs.length; i++) {
+        var l = logs[i];
+        html += '<tr>' +
+          '<td>' + escapeHtml(l.tanggal) + ' ' + escapeHtml(l.waktu) + '</td>' +
+          '<td><span style="font-weight:bold; color:var(--accent-neon);">' + escapeHtml(l.aksi) + '</span></td>' +
+          '<td>' + escapeHtml(l.targetBlok) + '</td>' +
+          '<td>' + escapeHtml(l.detail) + '</td>' +
+          '<td>' + escapeHtml(l.petugas) + '</td>' +
+        '</tr>';
+      }
+      tbody.innerHTML = html;
+    }
+
+    function executeExportVisitData() {
+      var params = {
+        startDate: document.getElementById('exportStartDate').value,
+        endDate: document.getElementById('exportEndDate').value,
+        keperluan: document.getElementById('exportKeperluan').value,
+        status: document.getElementById('exportStatus').value
+      };
+
+      var btn = document.getElementById('btnDownloadExport');
+      btn.disabled = true;
+      btn.innerText = 'Mengunduh Laporan...';
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            btn.disabled = false;
+            btn.innerText = '📥 Unduh Laporan (.CSV)';
+            if (res && res.success) {
+              triggerBrowserDownload(res.csvData, res.filename);
+              showToast('Laporan (' + res.rowCount + ' baris) berhasil diunduh', 'success');
+            } else {
+              showToast((res && res.error) || 'Gagal mengekspor laporan', 'error');
+            }
+          })
+          .exportVisitData(params);
+      } else {
+        setTimeout(function() {
+          btn.disabled = false;
+          btn.innerText = '📥 Unduh Laporan (.CSV)';
+          var dummyCsv = '"ID Kunjungan","Tanggal","Nama Tamu"\r\n"VST-001","21/10/2026","Budi"';
+          triggerBrowserDownload(dummyCsv, 'Laporan_Walini_Demo.csv');
+          showToast('[Preview] File CSV berhasil didownload', 'success');
+        }, 300);
+      }
+    }
+
+    function triggerBrowserDownload(content, filename) {
+      var blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+      var link = document.createElement('a');
+      var url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    function loadSystemConfig() {
+      var gasInput = document.getElementById('cfgGasApiUrl');
+      if (gasInput) gasInput.value = state.gasApiUrl;
+
+      requestBackend('getSystemConfig', null, function(res) {
+        if (res && res.success && res.data) {
+          document.getElementById('cfgWaUrl').value = res.data.waGatewayUrl || '';
+          document.getElementById('cfgWaToken').value = res.data.waApiToken || '';
+          document.getElementById('cfgEmergencyNumbers').value = res.data.emergencyNumbers || '';
+          document.getElementById('cfgOverstay').value = res.data.overstayHours || '4';
+          document.getElementById('cfgQrExpire').value = res.data.qrExpirationHours || '12';
+        }
+      });
+    }
+
+    function submitSaveConfig() {
+      var gasUrlVal = (document.getElementById('cfgGasApiUrl').value || '').trim();
+      state.gasApiUrl = gasUrlVal;
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem('WALINI_GAS_API_URL', gasUrlVal);
+      }
+
+      var payload = {
+        waGatewayUrl: document.getElementById('cfgWaUrl').value.trim(),
+        waApiToken: document.getElementById('cfgWaToken').value.trim(),
+        emergencyNumbers: document.getElementById('cfgEmergencyNumbers').value.trim(),
+        overstayHours: document.getElementById('cfgOverstay').value.trim(),
+        qrExpirationHours: document.getElementById('cfgQrExpire').value.trim()
+      };
+
+      requestBackend('saveSystemConfig', payload, function(res) {
+        if (res && res.success) {
+          showToast(res.message, 'success');
+        } else {
+          showToast('Konfigurasi tersimpan secara lokal di browser', 'success');
+        }
+      });
+    }
+          })
+          .getSystemConfig();
+      }
+    }
+
+    function submitSaveConfig() {
+      var payload = {
+        waGatewayUrl: document.getElementById('cfgWaUrl').value.trim(),
+        waApiToken: document.getElementById('cfgWaToken').value.trim(),
+        emergencyNumbers: document.getElementById('cfgEmergencyNumbers').value.trim(),
+        overstayHours: document.getElementById('cfgOverstay').value.trim(),
+        qrExpirationHours: document.getElementById('cfgQrExpire').value.trim()
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) showToast(res.message, 'success');
+          })
+          .saveSystemConfig(payload);
+      } else {
+        showToast('[Preview] Konfigurasi berhasil disimpan', 'success');
+      }
+    }
+
+    function loadMasterBlok() {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              state.masterBlokList = res.list || [];
+              renderMasterBlokUI();
+            }
+          })
+          .getMasterBlokList();
+      } else {
+        state.masterBlokList = previewMasterBlok;
+        renderMasterBlokUI();
+      }
+    }
+
+    function renderMasterBlokUI() {
+      var datalist = document.getElementById('masterBlokList');
+      var dlHtml = '';
+      for (var i = 0; i < state.masterBlokList.length; i++) {
+        var b = state.masterBlokList[i];
+        dlHtml += '<option value="' + escapeHtml(b.blok) + '">' + escapeHtml(b.penghuni) + '</option>';
+      }
+      datalist.innerHTML = dlHtml;
+      filterMasterBlokDisplay();
+    }
+
+    function filterMasterBlokDisplay() {
+      var q = (document.getElementById('searchBlokInput').value || '').toLowerCase().trim();
+      var container = document.getElementById('masterBlokListContainer');
+      var filtered = state.masterBlokList.filter(function(x) {
+        return !q || x.blok.toLowerCase().indexOf(q) !== -1 || x.penghuni.toLowerCase().indexOf(q) !== -1;
+      });
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:16px; color:var(--text-dim);">- Tidak ada data -</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i = 0; i < filtered.length; i++) {
+        var item = filtered[i];
+        html += 
+          '<div style="background:rgba(0,0,0,0.25); border:1px solid var(--border-subtle); padding:10px 12px; border-radius:var(--radius-sm); display:flex; justify-content:space-between; align-items:center;">' +
+            '<div>' +
+              '<strong style="color:#fff; display:block; font-size:0.86rem;">' + escapeHtml(item.blok) + ' &bull; ' + escapeHtml(item.penghuni) + '</strong>' +
+              '<span style="font-size:0.72rem; color:var(--text-muted);">📱 ' + escapeHtml(item.kontak || '-') + ' (' + escapeHtml(item.keterangan) + ')</span>' +
+            '</div>' +
+            '<div style="display:flex; gap:6px;">' +
+              '<button class="btn btn-secondary btn-sm" onclick="editBlokItem(\'' + escapeHtml(item.blok) + '\')">✏️</button>' +
+              '<button class="btn btn-danger btn-sm" onclick="confirmDeleteBlok(\'' + escapeHtml(item.blok) + '\')">🗑️</button>' +
+            '</div>' +
+          '</div>';
+      }
+      container.innerHTML = html;
+    }
+
+    function editBlokItem(blokNomor) {
+      for (var i = 0; i < state.masterBlokList.length; i++) {
+        var b = state.masterBlokList[i];
+        if (b.blok === blokNomor) {
+          document.getElementById('inputBlokNomor').value = b.blok;
+          document.getElementById('inputBlokPenghuni').value = b.penghuni;
+          document.getElementById('inputBlokKontak').value = b.kontak || '';
+          document.getElementById('selectBlokKeterangan').value = b.keterangan || 'Warga Tetap';
+          document.getElementById('formBlokTitle').innerText = 'Edit ' + b.blok;
+          break;
+        }
+      }
+    }
+
+    function resetBlokForm() {
+      document.getElementById('masterBlokForm').reset();
+      document.getElementById('formBlokTitle').innerText = 'Tambah Kavling Baru';
+    }
+
+    function submitSaveMasterBlok() {
+      var payload = {
+        blok: document.getElementById('inputBlokNomor').value.trim(),
+        penghuni: document.getElementById('inputBlokPenghuni').value.trim(),
+        kontak: document.getElementById('inputBlokKontak').value.trim(),
+        keterangan: document.getElementById('selectBlokKeterangan').value
+      };
+
+      if (!payload.blok || !payload.penghuni) {
+        showToast('Nomor Blok dan Nama Penghuni wajib diisi', 'warning');
+        return;
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              showToast(res.message, 'success');
+              resetBlokForm();
+              loadMasterBlok();
+            }
+          })
+          .saveMasterBlok(payload);
+      } else {
+        previewMasterBlok.push(payload);
+        showToast('[Preview] Kavling berhasil disimpan', 'success');
+        resetBlokForm();
+        loadMasterBlok();
+      }
+    }
+
+    function confirmDeleteBlok(blokNomor) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) {
+              showToast(res.message, 'success');
+              loadMasterBlok();
+            }
+          })
+          .deleteMasterBlok(blokNomor);
+      } else {
+        previewMasterBlok = previewMasterBlok.filter(function(x) { return x.blok !== blokNomor; });
+        showToast('[Preview] Kavling telah dihapus', 'success');
+        loadMasterBlok();
+      }
+    }
+
+    function openSosResidentModal() { document.getElementById('sosResidentModal').classList.add('show'); }
+    function closeSosResidentModal() { document.getElementById('sosResidentModal').classList.remove('show'); }
+
+    function triggerPanicSignal() {
+      var blok = document.getElementById('sosBlokRumah').value.trim();
+      var kat = document.getElementById('sosKategori').value;
+
+      if (!blok) {
+        showToast('Pilih atau ketik nomor blok kavling Anda', 'warning');
+        return;
+      }
+
+      var payload = {
+        blok: blok,
+        penghuni: 'Warga ' + blok,
+        kontak: '-',
+        kategori: kat,
+        catatan: 'Alarm Panic SOS diaktifkan dari ponsel warga'
+      };
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            closeSosResidentModal();
+            showToast('🚨 Sinyal darurat dikirimkan! Bantuan & siaran WhatsApp meluncur.', 'warning');
+          })
+          .triggerEmergencySOS(payload);
+      } else {
+        closeSosResidentModal();
+        showToast('[Preview] Sinyal SOS Terkirim!', 'warning');
+        triggerVisualAndAudioAlarm({
+          id: 'EMG-DEMO',
+          blok: blok,
+          penghuni: 'Keluarga Bpk. Adit',
+          kontak: '085712349876',
+          kategori: kat,
+          waktu: 'Sekarang'
+        });
+      }
+    }
+
+    function startEmergencyWatcher() {
+      setInterval(function() {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              if (res && res.success && res.active && res.data) {
+                if (state.lastAlertedEmergencyId !== res.data.id) {
+                  triggerVisualAndAudioAlarm(res.data);
+                }
+              }
+            })
+            .checkActiveEmergency();
+        }
+      }, 4000);
+    }
+
+    function triggerVisualAndAudioAlarm(data) {
+      state.activeEmergencyId = data.id;
+      state.lastAlertedEmergencyId = data.id;
+      document.getElementById('emgBlokVal').innerText = data.blok;
+      document.getElementById('emgPenghuniVal').innerText = data.penghuni;
+      document.getElementById('emgKontakVal').innerText = data.kontak;
+      document.getElementById('emgKategoriVal').innerText = data.kategori;
+      document.getElementById('emgWaktuVal').innerText = data.waktu;
+      document.getElementById('emergencyStrobeOverlay').style.display = 'flex';
+      
+      startSirenAudio();
+      triggerHapticFeedback();
+
+      // Trigger Web Push Notification for Background/Minimized Tab
+      if ('Notification' in window && Notification.permission === 'granted') {
+        try {
+          new Notification('🚨 DARURAT POS SATPAM: ' + data.blok, {
+            body: data.penghuni + ' - ' + data.kategori + ' (' + data.waktu + ' WIB). Respon segera!',
+            icon: 'https://placehold.co/128x128/ef4444/ffffff?text=SOS',
+            requireInteraction: true,
+            tag: 'walini-sos-alert'
+          });
+        } catch (e) {
+          console.warn('System Notification error:', e);
+        }
+      }
+    }
+
+    function startSirenAudio() {
+      try {
+        if (!state.sirenAudioContext) {
+          state.sirenAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (state.sirenAudioContext.state === 'suspended') {
+          state.sirenAudioContext.resume();
+        }
+        if (!state.sirenOscillator) {
+          var osc = state.sirenAudioContext.createOscillator();
+          var gain = state.sirenAudioContext.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(500, state.sirenAudioContext.currentTime);
+          osc.frequency.exponentialRampToValueAtTime(1000, state.sirenAudioContext.currentTime + 0.6);
+          gain.gain.setValueAtTime(0.18, state.sirenAudioContext.currentTime);
+          osc.connect(gain);
+          gain.connect(state.sirenAudioContext.destination);
+          osc.start();
+          state.sirenOscillator = osc;
+        }
+      } catch (e) {
+        console.log('Audio policy:', e);
+      }
+    }
+
+    function stopSirenAudioOnly() {
+      if (state.sirenOscillator) {
+        try {
+          state.sirenOscillator.stop();
+          state.sirenOscillator.disconnect();
+        } catch (e) {}
+        state.sirenOscillator = null;
+      }
+    }
+
+    function resolveEmergencyNow() {
+      stopSirenAudioOnly();
+      document.getElementById('emergencyStrobeOverlay').style.display = 'none';
+
+      if (state.activeEmergencyId) {
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(function(res) {
+              showToast('Status darurat selesai ditangani.', 'success');
+              state.activeEmergencyId = null;
+            })
+            .resolveEmergencySOS(state.activeEmergencyId, 'Ditangani oleh Satpam Pos Jaga');
+        } else {
+          showToast('[Preview] Darurat ditutup.', 'success');
+          state.activeEmergencyId = null;
+        }
+      }
+    }
+
+    function openShiftModal() {
+      document.getElementById('shiftModal').classList.add('show');
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            if (res && res.success) populateShiftReport(res);
+          })
+          .getShiftHandoverReport();
+      } else {
+        populateShiftReport({
+          reportDate: '21/10/2026',
+          printedAt: '21/10/2026 12:00:00',
+          totalMasuk: 3,
+          totalKeluar: 1,
+          totalAktif: 2,
+          totalOverstay: 1,
+          keperluanStats: { 'Kurir Paket': 1, 'Teknisi/Tukang': 1, 'Tamu Warga': 1 },
+          activeGuests: [{ plat: 'D 1982 ABC', nama: 'Agus Indihome', blok: 'Blok B-05', isOverstay: 'YA' }]
+        });
+      }
+    }
+
+    function populateShiftReport(rpt) {
+      document.getElementById('rptDate').innerText = rpt.reportDate;
+      document.getElementById('rptTime').innerText = rpt.printedAt;
+      document.getElementById('rptTotalMasuk').innerText = rpt.totalMasuk;
+      document.getElementById('rptTotalKeluar').innerText = rpt.totalKeluar;
+      document.getElementById('rptTotalAktif').innerText = rpt.totalAktif;
+      document.getElementById('rptTotalOverstay').innerText = rpt.totalOverstay;
+
+      var kHtml = '';
+      for (var k in rpt.keperluanStats) {
+        kHtml += '<div style="display:flex; justify-content:space-between;"><span>- ' + escapeHtml(k) + '</span><span>' + rpt.keperluanStats[k] + '</span></div>';
+      }
+      document.getElementById('rptKeperluanBreakdown').innerHTML = kHtml || '<div>-</div>';
+
+      var aHtml = '';
+      if (rpt.activeGuests && rpt.activeGuests.length > 0) {
+        for (var i = 0; i < rpt.activeGuests.length; i++) {
+          var ag = rpt.activeGuests[i];
+          aHtml += '<div style="display:flex; justify-content:space-between;"><span>' + escapeHtml(ag.plat) + ' (' + escapeHtml(ag.nama) + ') -> ' + escapeHtml(ag.blok) + '</span><span style="color:' + (ag.isOverstay === 'YA' ? '#dc2626' : '#059669') + '">' + (ag.isOverstay === 'YA' ? '[OVERSTAY]' : '[AKTIF]') + '</span></div>';
+        }
+      } else {
+        aHtml = '<div>Semua tamu telah keluar.</div>';
+      }
+      document.getElementById('rptActiveGuestsList').innerHTML = aHtml;
+    }
+
+    function closeShiftModal() { document.getElementById('shiftModal').classList.remove('show'); }
+
+    function simulateFingerprintValidation() {
+      var btn = document.getElementById('fingerprintBtn');
+      var circle = btn.querySelector('.sensor-scanner-circle');
+      circle.style.boxShadow = '0 0 15px #00ffaa';
+      showToast('Memindai sidik jari / RFID kurir langganan...', 'warning');
+
+      setTimeout(function() {
+        circle.style.boxShadow = 'none';
+        applyQuickPassPreset('J&T Express Reguler', 'Kurir Paket', 'D 4512 JK', 'Motor');
+        showToast('Validasi Quick Pass Berhasil: Kurir J&T Express!', 'success');
+      }, 500);
+    }
+
+    function applyQuickPassPreset(nama, keperluan, plat, kendaraan) {
+      document.getElementById('inputNama').value = nama;
+      document.getElementById('inputPlat').value = plat;
+      document.getElementById('selectKeperluan').value = keperluan;
+      document.getElementById('selectKendaraan').value = kendaraan;
+      document.getElementById('inputBlok').focus();
+    }
+
+    function setFilterStatus(status) {
+      state.activeFilter = status;
+      var btns = document.querySelectorAll('.filter-btn');
+      for (var i = 0; i < btns.length; i++) {
+        if (btns[i].getAttribute('data-status') === status) btns[i].classList.add('active');
+        else btns[i].classList.remove('active');
+      }
+      fetchGuests(1);
+    }
+
+    function handleSearchInput() {
+      clearTimeout(state.searchDebounceTimer);
+      state.searchDebounceTimer = setTimeout(function() { fetchGuests(1); }, 300);
+    }
+
+    function changePage(delta) {
+      var target = state.currentPage + delta;
+      if (target >= 1 && target <= state.totalPages) fetchGuests(target);
+    }
+
+    function updatePagination(page, totalPages, totalCount) {
+      state.currentPage = page;
+      state.totalPages = totalPages;
+      state.totalCount = totalCount;
+      document.getElementById('paginationInfo').innerText = 'Halaman ' + page + ' dari ' + totalPages + ' (' + totalCount + ' tamu)';
+      document.getElementById('btnPrevPage').disabled = (page <= 1);
+      document.getElementById('btnNextPage').disabled = (page >= totalPages);
+    }
+
+    function updateStats(summary) {
+      if (!summary) return;
+      document.getElementById('statAktif').innerText = summary.tamuAktif || 0;
+      document.getElementById('statOverstay').innerText = summary.tamuOverstay || 0;
+      document.getElementById('statTotal').innerText = summary.totalTamuHariIni || 0;
+      document.getElementById('statSelesai').innerText = summary.tamuSelesai || 0;
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+    }
+
+    function showToast(message, type) {
+      type = type || 'success';
+      var container = document.getElementById('toastContainer');
+      var toast = document.createElement('div');
+      toast.className = 'toast toast-' + type;
+      toast.innerText = message;
+      container.appendChild(toast);
+      setTimeout(function() {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(function() { if (toast.parentNode) toast.parentNode.removeChild(toast); }, 300);
+      }, 3500);
+    }
+  </script>
+</body>
+</html>
