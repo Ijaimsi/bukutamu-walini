@@ -19,7 +19,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   
-  <!-- Html5-Qrcode In-Memory Image & Live Camera Engine -->
+  <!-- Html5-Qrcode Camera Engine -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -119,13 +119,6 @@
       flex-wrap: wrap;
     }
 
-    .btn-pwa-install {
-      background: linear-gradient(135deg, #00ffaa, #059669);
-      color: #0b0f19;
-      font-weight: 700;
-      animation: pulseGlow 3s infinite;
-    }
-
     .live-camera-container {
       width: 100%;
       border-radius: var(--radius-md);
@@ -135,6 +128,14 @@
       margin-bottom: 12px;
       position: relative;
       min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #qrLiveReaderNode {
+      width: 100%;
+      height: 100%;
     }
 
     #qrLiveReaderNode video {
@@ -142,6 +143,27 @@
       height: auto !important;
       object-fit: cover;
       border-radius: var(--radius-md);
+    }
+
+    .qr-success-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(16, 185, 129, 0.92);
+      z-index: 15;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      animation: fadeIn 0.15s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
 
     .scanner-controls-bar {
@@ -723,6 +745,8 @@
       color: var(--text-dim);
       font-size: 1.4rem;
       cursor: pointer;
+      line-height: 1;
+      padding: 4px;
     }
 
     .modal-close:hover {
@@ -731,11 +755,6 @@
 
     .modal-body {
       padding: 20px;
-    }
-
-    @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 10px rgba(0, 255, 170, 0.3); }
-      50% { box-shadow: 0 0 25px rgba(0, 255, 170, 0.8); }
     }
 
     .admin-tabs {
@@ -1137,6 +1156,13 @@
         
         <div class="live-camera-container" id="cameraViewerBox">
           <div id="qrLiveReaderNode"></div>
+          
+          <!-- Indikator Visual Konfirmasi Berhasil -->
+          <div class="qr-success-overlay" id="qrSuccessVisual">
+            <div style="font-size:3.5rem; line-height:1; margin-bottom:8px;">✅</div>
+            <strong style="font-size:1.15rem; letter-spacing:0.5px;">QR TERVERIFIKASI!</strong>
+            <span style="font-size:0.8rem; opacity:0.9;">Memproses Check-In Otomatis...</span>
+          </div>
         </div>
 
         <div class="scanner-controls-bar">
@@ -1533,7 +1559,7 @@
     // ==========================================
     var APP_CONFIG = {
       // Masukkan Web App Deployment URL Anda di sini (akhiran /exec)
-      DEFAULT_GAS_API_URL: "https://script.google.com/macros/s/AKfycbx6fibvmn9fdW-GectHIo8VS_iMpMYRUZFVsT1WtfJx9kDhmkoy2jNJyzmu9iyu-m8k/exec",
+      DEFAULT_GAS_API_URL: "",
       OVERSTAY_HOURS: 4,
       ADMIN_PIN: "2026"
     };
@@ -1551,9 +1577,12 @@
       lastAlertedEmergencyId: null,
       sirenOscillator: null,
       sirenAudioContext: null,
+      audioCtx: null,
       lastGeneratedQrString: '',
       wakeLockSentinel: null,
       html5QrCodeInstance: null,
+      isScannerActive: false,
+      isProcessingQr: false,
       deferredPwaPrompt: null,
       currentCameraFacing: 'environment',
       isTorchOn: false,
@@ -1791,8 +1820,11 @@
         catatan: document.getElementById('inputCatatan').value.trim()
       };
 
-      if (!payload.namaTamu || !payload.platNomor || !payload.blokTujuan) {
-        showToast('Lengkapi Nama, Plat Nomor, dan Blok Tujuan', 'warning');
+      // Pastikan fallback nilai agar validasi tidak gagal jika plat nomor opsional di QR
+      if (!payload.platNomor) payload.platNomor = 'PAS-TAMU';
+
+      if (!payload.namaTamu || !payload.blokTujuan) {
+        showToast('Lengkapi Nama Tamu dan Blok Tujuan', 'warning');
         return;
       }
 
@@ -1858,17 +1890,43 @@
       });
     }
 
+    // ==========================================
+    // MODUL SCANNER KAMERA DENGAN PROTEKSI SIKLUS HIDUP
+    // ==========================================
     function openQrScanModal() {
+      state.isProcessingQr = false;
       document.getElementById('qrScanModal').classList.add('show');
       document.getElementById('inputQrRawData').value = '';
       document.getElementById('qrScanResultAlert').style.display = 'none';
       document.getElementById('qrManualArea').style.display = 'none';
+      
+      var successVisual = document.getElementById('qrSuccessVisual');
+      if (successVisual) successVisual.style.display = 'none';
+
+      // Pastikan AudioContext aktif saat ada user gesture
+      try {
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass && !state.audioCtx) {
+          state.audioCtx = new AudioContextClass();
+        }
+        if (state.audioCtx && state.audioCtx.state === 'suspended') {
+          state.audioCtx.resume();
+        }
+      } catch (e) {}
+
       startLiveCameraStream();
     }
 
     function closeQrScanModal() {
+      // Prioritas Utama: Hilangkan overlay modal terlebih dahulu agar UI tidak pernah terkunci
+      var modal = document.getElementById('qrScanModal');
+      if (modal) modal.classList.remove('show');
+
+      var successVisual = document.getElementById('qrSuccessVisual');
+      if (successVisual) successVisual.style.display = 'none';
+
+      state.isProcessingQr = false;
       stopLiveCameraStream();
-      document.getElementById('qrScanModal').classList.remove('show');
     }
 
     function startLiveCameraStream() {
@@ -1876,6 +1934,9 @@
         if (!state.html5QrCodeInstance) {
           state.html5QrCodeInstance = new Html5Qrcode('qrLiveReaderNode');
         }
+
+        // Jika scanner sudah dalam status berjalan, jangan mulai ulang
+        if (state.isScannerActive) return;
 
         var config = {
           fps: 15,
@@ -1887,21 +1948,40 @@
           { facingMode: state.currentCameraFacing },
           config,
           function(decodedText) {
+            // Mencegah pembacaan beruntun (multi-trigger mutex lock)
+            if (state.isProcessingQr) return;
+            state.isProcessingQr = true;
+
+            // 1. Tanda Bunyi Suara Beep & Getaran Taktil Ganda
             playScanBeepSound();
             triggerHapticFeedback();
-            showToast('✅ Pas Tamu Berhasil Dipindai!', 'success');
+
+            // 2. Tampilkan Indikator Visual Sukses di Viewport Kamera
+            var successVisual = document.getElementById('qrSuccessVisual');
+            if (successVisual) successVisual.style.display = 'flex';
+
+            // 3. Matikan stream kamera secara aman
             stopLiveCameraStream();
+
+            // 4. Proses data hasil pemindaian
             processScannedQrData(decodedText);
           },
           function(errorMessage) {
             // scanning loop...
           }
-        ).catch(function(err) {
+        ).then(function() {
+          state.isScannerActive = true;
+        }).catch(function(err) {
           console.warn('Live camera stream notice:', err);
-          document.getElementById('qrLiveReaderNode').innerHTML = 
-            '<div style="padding:40px 16px; color:var(--text-muted); font-size:0.8rem;">' +
-              'Gunakan tombol <strong>📸 Jepret Native</strong> di bawah untuk memindai via kamera gadget Anda.' +
-            '</div>';
+          state.isScannerActive = false;
+          var node = document.getElementById('qrLiveReaderNode');
+          if (node) {
+            node.innerHTML = 
+              '<div style="padding:40px 16px; color:var(--text-muted); font-size:0.8rem;">' +
+                'Kamera video langsung tidak dapat diakses atau izin ditolak.<br>' +
+                'Gunakan tombol <strong>📸 Jepret Native</strong> di bawah untuk memindai via kamera gadget Anda.' +
+              '</div>';
+          }
         });
       } catch (e) {
         console.warn('Scanner init error:', e);
@@ -1909,29 +1989,40 @@
     }
 
     function stopLiveCameraStream() {
-      if (state.html5QrCodeInstance) {
-        state.html5QrCodeInstance.stop().then(function() {
-          state.html5QrCodeInstance.clear();
-        }).catch(function() {});
-      }
       state.isTorchOn = false;
       var tBtn = document.getElementById('btnTorchFlash');
       if (tBtn) tBtn.innerText = '🔦 Senter: OFF';
+
+      if (state.html5QrCodeInstance && state.isScannerActive) {
+        try {
+          state.html5QrCodeInstance.stop().then(function() {
+            state.isScannerActive = false;
+            try { state.html5QrCodeInstance.clear(); } catch(e){}
+          }).catch(function(err) {
+            state.isScannerActive = false;
+            console.warn('Silent stop error:', err);
+          });
+        } catch(e) {
+          state.isScannerActive = false;
+        }
+      }
     }
 
     function toggleSwitchCamera() {
       state.currentCameraFacing = (state.currentCameraFacing === 'environment') ? 'user' : 'environment';
-      if (state.html5QrCodeInstance) {
+      if (state.html5QrCodeInstance && state.isScannerActive) {
         state.html5QrCodeInstance.stop().then(function() {
+          state.isScannerActive = false;
           startLiveCameraStream();
         }).catch(function() {
+          state.isScannerActive = false;
           startLiveCameraStream();
         });
       }
     }
 
     function toggleTorchFlash() {
-      if (!state.html5QrCodeInstance) return;
+      if (!state.html5QrCodeInstance || !state.isScannerActive) return;
       state.isTorchOn = !state.isTorchOn;
       try {
         state.html5QrCodeInstance.applyVideoConstraints({
@@ -1964,8 +2055,10 @@
         .then(function(decodedText) {
           playScanBeepSound();
           triggerHapticFeedback();
-          showToast('✅ Pas Tamu Berhasil Dipindai!', 'success');
-          stopLiveCameraStream();
+          
+          var successVisual = document.getElementById('qrSuccessVisual');
+          if (successVisual) successVisual.style.display = 'flex';
+
           processScannedQrData(decodedText);
         })
         .catch(function(err) {
@@ -1984,6 +2077,7 @@
       var raw = scannedContent || document.getElementById('inputQrRawData').value.trim();
       if (!raw) {
         showToast('Tempel atau masukkan data kode QR terlebih dahulu', 'warning');
+        state.isProcessingQr = false;
         return;
       }
 
@@ -1991,33 +2085,52 @@
 
       requestBackend('validateQrVisitorPass', raw, function(res) {
         if (res && res.success) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
-          alertBox.style.color = '#34d399';
-          alertBox.innerText = '✅ PAS TAMU VALID! Memproses Check-In otomatis...';
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+            alertBox.style.color = '#34d399';
+            alertBox.innerText = '✅ PAS TAMU VALID! Memproses Check-In otomatis...';
+          }
           
+          var passData = res.data || {};
+          if (!passData.platNomor) passData.platNomor = 'PAS-TAMU';
+
           setTimeout(function() {
             closeQrScanModal();
-            submitCheckIn(res.data);
-          }, 600);
+            submitCheckIn(passData);
+          }, 450);
         } else if (res && res.isExpired) {
-          alertBox.style.display = 'block';
-          alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
-          alertBox.style.color = '#fca5a5';
-          alertBox.innerText = '❌ ' + res.error;
+          state.isProcessingQr = false;
+          var successVisual = document.getElementById('qrSuccessVisual');
+          if (successVisual) successVisual.style.display = 'none';
+
+          if (alertBox) {
+            alertBox.style.display = 'block';
+            alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+            alertBox.style.color = '#fca5a5';
+            alertBox.innerText = '❌ ' + res.error;
+          }
         } else if (!state.gasApiUrl && typeof google === 'undefined') {
           try {
             var d = JSON.parse(raw);
             if (Date.now() > d.expiresAt) {
-              alertBox.style.display = 'block';
-              alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
-              alertBox.style.color = '#fca5a5';
-              alertBox.innerText = '❌ KODE QR TELAH KADALUARSA!';
+              state.isProcessingQr = false;
+              var sVis = document.getElementById('qrSuccessVisual');
+              if (sVis) sVis.style.display = 'none';
+
+              if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
+                alertBox.style.color = '#fca5a5';
+                alertBox.innerText = '❌ KODE QR TELAH KADALUARSA!';
+              }
             } else {
-              alertBox.style.display = 'block';
-              alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
-              alertBox.style.color = '#34d399';
-              alertBox.innerText = '✅ [Preview] QR Valid! Memproses Check-In...';
+              if (alertBox) {
+                alertBox.style.display = 'block';
+                alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
+                alertBox.style.color = '#34d399';
+                alertBox.innerText = '✅ [Preview] QR Valid! Memproses Check-In...';
+              }
               setTimeout(function() {
                 closeQrScanModal();
                 submitCheckIn({
@@ -2029,30 +2142,51 @@
                   keperluan: d.keperluan || 'Tamu Warga',
                   catatan: 'Validasi QR Pas Sukses'
                 });
-              }, 600);
+              }, 450);
             }
           } catch (e) {
+            state.isProcessingQr = false;
             showToast('Format QR tidak sesuai', 'error');
           }
         } else {
+          state.isProcessingQr = false;
           showToast((res && res.error) || 'Format QR salah', 'error');
         }
       });
     }
 
+    // ==========================================
+    // TANDA BUNYI & GETAR BERHASIL PINDAI
+    // ==========================================
     function playScanBeepSound() {
       try {
-        var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        var osc = audioCtx.createOscillator();
-        var gain = audioCtx.createGain();
+        var AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return;
+        
+        var ctx = state.audioCtx || new AudioContextClass();
+        state.audioCtx = ctx;
+
+        if (ctx.state === 'suspended') {
+          ctx.resume();
+        }
+
+        // Chime nada ganda afirmatif (880 Hz naik ke 1320 Hz)
+        var now = ctx.currentTime;
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+
         osc.type = 'sine';
-        osc.frequency.setValueAtTime(1050, audioCtx.currentTime);
-        gain.gain.setValueAtTime(0.25, audioCtx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.12);
+        osc.frequency.setValueAtTime(880, now);
+        osc.frequency.exponentialRampToValueAtTime(1320, now + 0.08);
+
+        gain.gain.setValueAtTime(0.35, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.18);
+
         osc.connect(gain);
-        gain.connect(audioCtx.destination);
-        osc.start();
-        osc.stop(audioCtx.currentTime + 0.13);
+        gain.connect(ctx.destination);
+
+        osc.start(now);
+        osc.stop(now + 0.19);
       } catch (e) {
         console.warn('Audio Beep Error:', e);
       }
@@ -2061,7 +2195,8 @@
     function triggerHapticFeedback() {
       try {
         if ('vibrate' in navigator) {
-          navigator.vibrate(100);
+          // Pola getar ganda tegas: 90ms getar, 40ms hening, 110ms getar
+          navigator.vibrate([90, 40, 110]);
         }
       } catch (e) {
         console.warn('Haptic Vibration Error:', e);
