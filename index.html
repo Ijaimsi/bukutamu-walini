@@ -5,28 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>THE GREEN WALINI - Sistem Catatan Tamu Pos Satpam</title>
 
+  <!-- PWA Manifest & Standalone Mobile Meta -->
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#0b0f19">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Pos Walini">
-  <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="https://placehold.co/192x192/0b0f19/00ffaa?text=GW">
 
+  <!-- Web Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   
-  <!-- PWA Manifest & Mobile Standalone Meta -->
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#0b0f19">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Pos Walini">
-  <link rel="apple-touch-icon" href="https://placehold.co/192x192/0b0f19/00ffaa?text=GW">
-
-  <!-- Html5-Qrcode In-Memory Image Engine -->
+  <!-- Html5-Qrcode In-Memory Image & Live Camera Engine -->
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 
   <style>
@@ -496,20 +489,6 @@
       animation: pulseSos 2s infinite;
     }
 
-    .btn-scanner-hero {
-      background: linear-gradient(135deg, #00ffaa, #10b981);
-      color: #0b0f19;
-      font-weight: 800;
-      box-shadow: 0 6px 20px rgba(0, 255, 170, 0.35);
-      padding: 14px 20px;
-      font-size: 0.95rem;
-    }
-
-    .btn-scanner-hero:hover {
-      background: linear-gradient(135deg, #00e699, #059669);
-      color: #000;
-    }
-
     @keyframes pulseSos {
       0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.5); }
       50% { box-shadow: 0 0 20px rgba(239, 68, 68, 0.9); }
@@ -752,35 +731,6 @@
 
     .modal-body {
       padding: 20px;
-    }
-
-    .native-scanner-hero-card {
-      background: linear-gradient(145deg, #162536, #0e1724);
-      border: 2px dashed #00ffaa;
-      border-radius: var(--radius-md);
-      padding: 24px 20px;
-      text-align: center;
-      margin-bottom: 16px;
-      box-shadow: 0 0 25px rgba(0, 255, 170, 0.15);
-    }
-
-    .scanner-target-icon {
-      width: 80px;
-      height: 80px;
-      border-radius: 50%;
-      background: rgba(0, 255, 170, 0.1);
-      border: 2px solid #00ffaa;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px auto;
-      animation: pulseGlow 2.5s infinite;
-    }
-
-    .scanner-target-icon svg {
-      width: 44px;
-      height: 44px;
-      stroke: #00ffaa;
     }
 
     @keyframes pulseGlow {
@@ -1176,6 +1126,7 @@
     </div>
   </main>
 
+  <!-- MODAL: SCAN QR PAS -->
   <div class="modal-backdrop" id="qrScanModal">
     <div class="modal-content" style="max-width: 480px;">
       <div class="modal-header">
@@ -1218,6 +1169,7 @@
     </div>
   </div>
 
+  <!-- MODAL: PIN ADMIN -->
   <div class="modal-backdrop" id="adminPinModal">
     <div class="modal-content" style="max-width: 380px;">
       <div class="modal-header">
@@ -1226,7 +1178,7 @@
       </div>
       <div class="modal-body">
         <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:14px;">
-          Masukkan PIN Keamanan untuk membuka modul administrasi, direktori kavling, audit trail, ekspor data, dan nomor darurat broadcast.
+          Masukkan PIN Keamanan untuk membuka modul administrasi kavling, audit trail, ekspor data, dan nomor darurat broadcast.
         </p>
         <form onsubmit="event.preventDefault(); verifyPinAndProceed();">
           <div class="form-group">
@@ -1239,6 +1191,7 @@
     </div>
   </div>
 
+  <!-- MODAL: PANEL ADMIN -->
   <div class="modal-backdrop" id="adminPanelModal">
     <div class="modal-content modal-lg">
       <div class="modal-header">
@@ -1414,6 +1367,7 @@
     </div>
   </div>
 
+  <!-- MODAL: BUAT PAS TAMU (QR GEN) -->
   <div class="modal-backdrop" id="qrGenModal">
     <div class="modal-content" style="max-width: 480px;">
       <div class="modal-header">
@@ -1479,6 +1433,7 @@
     </div>
   </div>
 
+  <!-- MODAL: SOS RESIDENT PORTAL -->
   <div class="modal-backdrop" id="sosResidentModal">
     <div class="modal-content" style="max-width: 440px;">
       <div class="modal-header">
@@ -1514,6 +1469,7 @@
     </div>
   </div>
 
+  <!-- STROBE OVERLAY DARURAT -->
   <div class="emergency-strobe-overlay" id="emergencyStrobeOverlay">
     <div class="emergency-box">
       <h2>🚨 SINYAL DARURAT WARGA AKTIF!</h2>
@@ -1534,6 +1490,7 @@
     </div>
   </div>
 
+  <!-- MODAL: SERAH TERIMA SHIFT -->
   <div class="modal-backdrop" id="shiftModal">
     <div class="modal-content" style="max-width: 520px;">
       <div class="modal-header">
@@ -1569,7 +1526,18 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
+  <!-- JAVASCRIPT LOGIC ENGINE -->
   <script>
+    // ==========================================
+    // KONFIGURASI GLOBAL SISTEM POS WALINI
+    // ==========================================
+    var APP_CONFIG = {
+      // Masukkan Web App Deployment URL Anda di sini (akhiran /exec)
+      DEFAULT_GAS_API_URL: "https://script.google.com/macros/s/AKfycbx6fibvmn9fdW-GectHIo8VS_iMpMYRUZFVsT1WtfJx9kDhmkoy2jNJyzmu9iyu-m8k/exec",
+      OVERSTAY_HOURS: 4,
+      ADMIN_PIN: "2026"
+    };
+
     var state = {
       currentPage: 1,
       itemsPerPage: 10,
@@ -1586,7 +1554,10 @@
       lastGeneratedQrString: '',
       wakeLockSentinel: null,
       html5QrCodeInstance: null,
-      deferredPwaPrompt: null
+      deferredPwaPrompt: null,
+      currentCameraFacing: 'environment',
+      isTorchOn: false,
+      gasApiUrl: (typeof localStorage !== 'undefined' && localStorage.getItem('WALINI_GAS_API_URL')) || APP_CONFIG.DEFAULT_GAS_API_URL || ''
     };
 
     var previewDummyData = [
@@ -1614,6 +1585,25 @@
       requestNotificationPermissionSilently();
     });
 
+    function initClock() {
+      function update() {
+        var now = new Date();
+        var h = ('0' + now.getHours()).slice(-2);
+        var m = ('0' + now.getMinutes()).slice(-2);
+        var s = ('0' + now.getSeconds()).slice(-2);
+        var clockNode = document.getElementById('tickerClock');
+        if (clockNode) clockNode.innerText = h + ':' + m + ':' + s;
+        
+        var dateNode = document.getElementById('tickerDate');
+        if (dateNode) {
+          var options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
+          dateNode.innerText = now.toLocaleDateString('id-ID', options);
+        }
+      }
+      update();
+      setInterval(update, 1000);
+    }
+
     function initPwaInstaller() {
       window.addEventListener('beforeinstallprompt', function(e) {
         e.preventDefault();
@@ -1634,9 +1624,6 @@
       if (state.deferredPwaPrompt) {
         state.deferredPwaPrompt.prompt();
         state.deferredPwaPrompt.userChoice.then(function(choiceResult) {
-          if (choiceResult.outcome === 'accepted') {
-            console.log('User menerima pemasangan PWA');
-          }
           state.deferredPwaPrompt = null;
         });
       } else {
@@ -1645,49 +1632,13 @@
     }
 
     function initScreenWakeLock() {
-
-    function triggerPwaInstallation() {
-      if (!state.deferredPwaPrompt) {
-        showToast('Gunakan menu browser: Tambahkan ke Layar Utama / Install', 'warning');
-        return;
-      }
-      state.deferredPwaPrompt.prompt();
-      state.deferredPwaPrompt.userChoice.then(function(choice) {
-        if (choice.outcome === 'accepted') {
-          showToast('Menginstall aplikasi ke layar tablet/HP...', 'success');
-        }
-        state.deferredPwaPrompt = null;
-      });
-    }
-
-    function requestBackend(actionName, payload, successCallback, errorCallback) {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        // Mode Native Google Apps Script
-        var runner = google.script.run.withSuccessHandler(successCallback);
-        if (errorCallback) runner = runner.withFailureHandler(errorCallback);
-        if (typeof runner[actionName] === 'function') {
-          runner[actionName](payload);
-        } else {
-          console.warn('Fungsi backend tidak ditemukan:', actionName);
-        }
-      } else if (state.gasApiUrl) {
-        // Mode GitHub Pages REST API
-        fetch(state.gasApiUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({ action: actionName, payload: payload })
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-          if (successCallback) successCallback(data);
-        })
-        .catch(function(err) {
-          console.error('API Error:', err);
-          if (errorCallback) errorCallback(err);
+      if ('wakeLock' in navigator) {
+        navigator.wakeLock.request('screen').then(function(sentinel) {
+          state.wakeLockSentinel = sentinel;
+          console.log('Screen WakeLock active');
+        }).catch(function(err) {
+          console.warn('WakeLock notice:', err);
         });
-      } else {
-        // Mode Simulasi Lokal / Demo Preview
-        if (successCallback) successCallback(null);
       }
     }
 
@@ -1717,23 +1668,41 @@
       triggerHapticFeedback();
     }
 
-    function initClock() {
-      function update() {
-        var now = new Date();
-        var h = ('0' + now.getHours()).slice(-2);
-        var m = ('0' + now.getMinutes()).slice(-2);
-        var s = ('0' + now.getSeconds()).slice(-2);
-        document.getElementById('tickerClock').innerText = h + ':' + m + ':' + s;
-        var options = { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' };
-        document.getElementById('tickerDate').innerText = now.toLocaleDateString('id-ID', options);
+    function requestBackend(actionName, payload, successCallback, errorCallback) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        // Mode Native Google Apps Script
+        var runner = google.script.run.withSuccessHandler(successCallback);
+        if (errorCallback) runner = runner.withFailureHandler(errorCallback);
+        if (typeof runner[actionName] === 'function') {
+          runner[actionName](payload);
+        } else {
+          console.warn('Fungsi backend tidak ditemukan:', actionName);
+          if (errorCallback) errorCallback('Function not found: ' + actionName);
+        }
+      } else if (state.gasApiUrl) {
+        // Mode GitHub Pages REST API
+        fetch(state.gasApiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ action: actionName, payload: payload })
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (successCallback) successCallback(data);
+        })
+        .catch(function(err) {
+          console.error('API Error:', err);
+          if (errorCallback) errorCallback(err);
+        });
+      } else {
+        // Mode Standalone / Simulasi Pratinjau
+        if (successCallback) successCallback(null);
       }
-      update();
-      setInterval(update, 1000);
     }
 
     function fetchGuests(page) {
       if (typeof page === 'number') state.currentPage = page;
-      var keyword = document.getElementById('searchKeyword').value;
+      var keyword = (document.getElementById('searchKeyword') ? document.getElementById('searchKeyword').value : '');
       
       var params = {
         page: state.currentPage,
@@ -1755,19 +1724,6 @@
           showToast((res && res.error) || 'Gagal memuat data tamu', 'error');
         }
       });
-    }
-          })
-          .getGuests(params);
-      } else {
-        renderGuestCards(previewDummyData);
-        updatePagination(1, 1, previewDummyData.length);
-        updateStats({
-          totalTamuHariIni: 3,
-          tamuAktif: 2,
-          tamuOverstay: 1,
-          tamuSelesai: 1
-        });
-      }
     }
 
     function renderGuestCards(list) {
@@ -1841,12 +1797,16 @@
       }
 
       var btn = document.getElementById('btnSubmit');
-      btn.disabled = true;
-      btn.innerText = 'Menyimpan...';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = 'Menyimpan...';
+      }
 
       requestBackend('checkInGuest', payload, function(res) {
-        btn.disabled = false;
-        btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg> Catat Tamu Masuk (Check-In)';
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"></path></svg> Catat Tamu Masuk (Check-In)';
+        }
         if (res && res.success) {
           showToast('Check-In berhasil! Notifikasi WA diteruskan ke warga.', 'success');
           document.getElementById('checkInForm').reset();
@@ -1869,7 +1829,7 @@
             catatan: payload.catatan
           });
           document.getElementById('checkInForm').reset();
-          showToast('[GitHub / Preview] Tamu berhasil di-check in!', 'success');
+          showToast('[Preview] Tamu berhasil di-check in!', 'success');
           fetchGuests(1);
         } else {
           showToast((res && res.error) || 'Gagal menyimpan check-in', 'error');
@@ -1890,7 +1850,7 @@
               break;
             }
           }
-          showToast('[GitHub / Preview] Tamu telah keluar', 'success');
+          showToast('[Preview] Tamu telah keluar', 'success');
           fetchGuests();
         } else {
           showToast((res && res.error) || 'Gagal check-out', 'error');
@@ -1934,7 +1894,7 @@
             processScannedQrData(decodedText);
           },
           function(errorMessage) {
-            // scan failure / seeking - ignore
+            // scanning loop...
           }
         ).catch(function(err) {
           console.warn('Live camera stream notice:', err);
@@ -2079,59 +2039,6 @@
         }
       });
     }
-          })
-          .checkInGuest(payload);
-      } else {
-        setTimeout(function() {
-          btn.disabled = false;
-          btn.innerHTML = 'Catat Tamu Masuk (Check-In)';
-          previewDummyData.unshift({
-            id: 'VST-20261021-000' + (previewDummyData.length + 1),
-            tanggal: '21/10/2026',
-            jamMasuk: 'Baru saja',
-            jamKeluar: '-',
-            durasi: '0 menit',
-            namaTamu: payload.namaTamu,
-            noKontak: payload.noKontak,
-            platNomor: payload.platNomor,
-            jenisKendaraan: payload.jenisKendaraan,
-            blokTujuan: payload.blokTujuan,
-            keperluan: payload.keperluan,
-            status: 'MASUK',
-            isOverstay: 'TIDAK',
-            catatan: payload.catatan
-          });
-          document.getElementById('checkInForm').reset();
-          showToast('[Preview] Tamu berhasil di-check in!', 'success');
-          fetchGuests(1);
-        }, 250);
-      }
-    }
-
-    function handleCheckOut(visitId) {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) {
-              showToast('Check-Out selesai', 'success');
-              fetchGuests();
-            } else {
-              showToast((res && res.error) || 'Gagal check-out', 'error');
-            }
-          })
-          .checkOutGuest(visitId);
-      } else {
-        for (var i = 0; i < previewDummyData.length; i++) {
-          if (previewDummyData[i].id === visitId) {
-            previewDummyData[i].status = 'SELESAI';
-            previewDummyData[i].jamKeluar = 'Baru saja';
-            break;
-          }
-        }
-        showToast('[Preview] Tamu telah keluar', 'success');
-        fetchGuests();
-      }
-    }
 
     function playScanBeepSound() {
       try {
@@ -2158,126 +2065,6 @@
         }
       } catch (e) {
         console.warn('Haptic Vibration Error:', e);
-      }
-    }
-
-    function openQrScanModal() {
-      document.getElementById('qrScanModal').classList.add('show');
-      document.getElementById('inputQrRawData').value = '';
-      document.getElementById('qrScanResultAlert').style.display = 'none';
-      document.getElementById('qrManualArea').style.display = 'none';
-    }
-
-    function closeQrScanModal() {
-      document.getElementById('qrScanModal').classList.remove('show');
-    }
-
-    function triggerNativeCameraScan() {
-      var fileInput = document.getElementById('qrNativeFileInput');
-      if (fileInput) fileInput.click();
-    }
-
-    function handleNativeQrCapture(event) {
-      var file = event.target.files && event.target.files[0];
-      if (!file) return;
-
-      var btn = document.getElementById('btnTriggerCameraHero');
-      var originalText = btn.innerText;
-      btn.innerText = 'Memindai Foto QR...';
-      btn.disabled = true;
-
-      if (!state.html5QrCodeInstance) {
-        var dummyDiv = document.createElement('div');
-        dummyDiv.id = 'dummyQrReaderNode';
-        dummyDiv.style.display = 'none';
-        document.body.appendChild(dummyDiv);
-        state.html5QrCodeInstance = new Html5Qrcode('dummyQrReaderNode');
-      }
-
-      state.html5QrCodeInstance.scanFile(file, true)
-        .then(function(decodedText) {
-          btn.innerText = originalText;
-          btn.disabled = false;
-          playScanBeepSound();
-          triggerHapticFeedback();
-          showToast('✅ QR Pas Tamu Berhasil Dipindai!', 'success');
-          processScannedQrData(decodedText);
-        })
-        .catch(function(err) {
-          btn.innerText = originalText;
-          btn.disabled = false;
-          showToast('Kode QR tidak terdeteksi dalam foto. Mohon foto lebih dekat dan tidak buram.', 'error');
-        });
-
-      event.target.value = '';
-    }
-
-    function toggleManualQrInput() {
-      var area = document.getElementById('qrManualArea');
-      area.style.display = (area.style.display === 'none' || !area.style.display) ? 'block' : 'none';
-    }
-
-    function processScannedQrData(scannedContent) {
-      var raw = scannedContent || document.getElementById('inputQrRawData').value.trim();
-      if (!raw) {
-        showToast('Tempel atau masukkan data kode QR terlebih dahulu', 'warning');
-        return;
-      }
-
-      var alertBox = document.getElementById('qrScanResultAlert');
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) {
-              alertBox.style.display = 'block';
-              alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
-              alertBox.style.color = '#34d399';
-              alertBox.innerText = '✅ PAS TAMU VALID! Memproses Check-In otomatis...';
-              
-              setTimeout(function() {
-                closeQrScanModal();
-                submitCheckIn(res.data);
-              }, 700);
-            } else if (res && res.isExpired) {
-              alertBox.style.display = 'block';
-              alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
-              alertBox.style.color = '#fca5a5';
-              alertBox.innerText = '❌ ' + res.error;
-            } else {
-              showToast((res && res.error) || 'Format QR salah', 'error');
-            }
-          })
-          .validateQrVisitorPass(raw);
-      } else {
-        try {
-          var d = JSON.parse(raw);
-          if (Date.now() > d.expiresAt) {
-            alertBox.style.display = 'block';
-            alertBox.style.background = 'rgba(239, 68, 68, 0.2)';
-            alertBox.style.color = '#fca5a5';
-            alertBox.innerText = '❌ KODE QR TELAH KADALUARSA!';
-          } else {
-            alertBox.style.display = 'block';
-            alertBox.style.background = 'rgba(16, 185, 129, 0.2)';
-            alertBox.style.color = '#34d399';
-            alertBox.innerText = '✅ [Preview] QR Valid! Memproses Check-In...';
-            setTimeout(function() {
-              closeQrScanModal();
-              submitCheckIn({
-                namaTamu: d.namaTamu,
-                platNomor: d.platNomor || 'D 9999 DEMO',
-                blokTujuan: d.blokTujuan,
-                noKontak: '',
-                jenisKendaraan: 'Mobil',
-                keperluan: d.keperluan || 'Tamu Warga',
-                catatan: 'Validasi QR Pas Sukses'
-              });
-            }, 700);
-          }
-        } catch (e) {
-          showToast('Data QR tidak sesuai format digital The Green Walini', 'error');
-        }
       }
     }
 
@@ -2331,27 +2118,23 @@
 
     function verifyPinAndProceed() {
       var pin = document.getElementById('inputAdminPin').value.trim();
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.authorized) {
-              state.isAdminAuthenticated = true;
-              closeAdminPinModal();
-              openAdminPanelModal();
-            } else {
-              showToast('PIN Admin salah!', 'error');
-            }
-          })
-          .verifyAdminPin(pin);
-      } else {
-        if (pin === '2026') {
+      requestBackend('verifyAdminPin', pin, function(res) {
+        if (res && res.authorized) {
           state.isAdminAuthenticated = true;
           closeAdminPinModal();
           openAdminPanelModal();
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          if (pin === APP_CONFIG.ADMIN_PIN) {
+            state.isAdminAuthenticated = true;
+            closeAdminPinModal();
+            openAdminPanelModal();
+          } else {
+            showToast('PIN Admin salah (Demo: ' + APP_CONFIG.ADMIN_PIN + ')', 'error');
+          }
         } else {
-          showToast('PIN salah (Demo: 2026)', 'error');
+          showToast('PIN Admin salah!', 'error');
         }
-      }
+      });
     }
 
     function openAdminPanelModal() {
@@ -2379,17 +2162,15 @@
     }
 
     function loadAuditLogs() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) renderAuditLogsTable(res.list);
-          })
-          .getAdminAuditLogs(25);
-      } else {
-        renderAuditLogsTable([
-          { waktu: '12:00:00', tanggal: '21/10/2026', aksi: 'SIMPAN_BLOK', targetBlok: 'Blok B-05', detail: 'Update data kontak penghuni', petugas: 'Admin' }
-        ]);
-      }
+      requestBackend('getAdminAuditLogs', 25, function(res) {
+        if (res && res.success) {
+          renderAuditLogsTable(res.list);
+        } else {
+          renderAuditLogsTable([
+            { waktu: '12:00:00', tanggal: '21/10/2026', aksi: 'SIMPAN_BLOK', targetBlok: 'Blok B-05', detail: 'Update data kontak penghuni', petugas: 'Admin' }
+          ]);
+        }
+      });
     }
 
     function renderAuditLogsTable(logs) {
@@ -2424,28 +2205,20 @@
       btn.disabled = true;
       btn.innerText = 'Mengunduh Laporan...';
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            btn.disabled = false;
-            btn.innerText = '📥 Unduh Laporan (.CSV)';
-            if (res && res.success) {
-              triggerBrowserDownload(res.csvData, res.filename);
-              showToast('Laporan (' + res.rowCount + ' baris) berhasil diunduh', 'success');
-            } else {
-              showToast((res && res.error) || 'Gagal mengekspor laporan', 'error');
-            }
-          })
-          .exportVisitData(params);
-      } else {
-        setTimeout(function() {
-          btn.disabled = false;
-          btn.innerText = '📥 Unduh Laporan (.CSV)';
+      requestBackend('exportVisitData', params, function(res) {
+        btn.disabled = false;
+        btn.innerText = '📥 Unduh Laporan (.CSV)';
+        if (res && res.success) {
+          triggerBrowserDownload(res.csvData, res.filename);
+          showToast('Laporan (' + res.rowCount + ' baris) berhasil diunduh', 'success');
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
           var dummyCsv = '"ID Kunjungan","Tanggal","Nama Tamu"\r\n"VST-001","21/10/2026","Budi"';
           triggerBrowserDownload(dummyCsv, 'Laporan_Walini_Demo.csv');
           showToast('[Preview] File CSV berhasil didownload', 'success');
-        }, 300);
-      }
+        } else {
+          showToast((res && res.error) || 'Gagal mengekspor laporan', 'error');
+        }
+      });
     }
 
     function triggerBrowserDownload(content, filename) {
@@ -2497,45 +2270,17 @@
         }
       });
     }
-          })
-          .getSystemConfig();
-      }
-    }
-
-    function submitSaveConfig() {
-      var payload = {
-        waGatewayUrl: document.getElementById('cfgWaUrl').value.trim(),
-        waApiToken: document.getElementById('cfgWaToken').value.trim(),
-        emergencyNumbers: document.getElementById('cfgEmergencyNumbers').value.trim(),
-        overstayHours: document.getElementById('cfgOverstay').value.trim(),
-        qrExpirationHours: document.getElementById('cfgQrExpire').value.trim()
-      };
-
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) showToast(res.message, 'success');
-          })
-          .saveSystemConfig(payload);
-      } else {
-        showToast('[Preview] Konfigurasi berhasil disimpan', 'success');
-      }
-    }
 
     function loadMasterBlok() {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) {
-              state.masterBlokList = res.list || [];
-              renderMasterBlokUI();
-            }
-          })
-          .getMasterBlokList();
-      } else {
-        state.masterBlokList = previewMasterBlok;
-        renderMasterBlokUI();
-      }
+      requestBackend('getMasterBlokList', null, function(res) {
+        if (res && res.success) {
+          state.masterBlokList = res.list || [];
+          renderMasterBlokUI();
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          state.masterBlokList = previewMasterBlok;
+          renderMasterBlokUI();
+        }
+      });
     }
 
     function renderMasterBlokUI() {
@@ -2611,39 +2356,35 @@
         return;
       }
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) {
-              showToast(res.message, 'success');
-              resetBlokForm();
-              loadMasterBlok();
-            }
-          })
-          .saveMasterBlok(payload);
-      } else {
-        previewMasterBlok.push(payload);
-        showToast('[Preview] Kavling berhasil disimpan', 'success');
-        resetBlokForm();
-        loadMasterBlok();
-      }
+      requestBackend('saveMasterBlok', payload, function(res) {
+        if (res && res.success) {
+          showToast(res.message, 'success');
+          resetBlokForm();
+          loadMasterBlok();
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          previewMasterBlok.push(payload);
+          showToast('[Preview] Kavling berhasil disimpan', 'success');
+          resetBlokForm();
+          loadMasterBlok();
+        } else {
+          showToast((res && res.error) || 'Gagal menyimpan kavling', 'error');
+        }
+      });
     }
 
     function confirmDeleteBlok(blokNomor) {
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) {
-              showToast(res.message, 'success');
-              loadMasterBlok();
-            }
-          })
-          .deleteMasterBlok(blokNomor);
-      } else {
-        previewMasterBlok = previewMasterBlok.filter(function(x) { return x.blok !== blokNomor; });
-        showToast('[Preview] Kavling telah dihapus', 'success');
-        loadMasterBlok();
-      }
+      requestBackend('deleteMasterBlok', blokNomor, function(res) {
+        if (res && res.success) {
+          showToast(res.message, 'success');
+          loadMasterBlok();
+        } else if (!state.gasApiUrl && typeof google === 'undefined') {
+          previewMasterBlok = previewMasterBlok.filter(function(x) { return x.blok !== blokNomor; });
+          showToast('[Preview] Kavling telah dihapus', 'success');
+          loadMasterBlok();
+        } else {
+          showToast((res && res.error) || 'Gagal menghapus kavling', 'error');
+        }
+      });
     }
 
     function openSosResidentModal() { document.getElementById('sosResidentModal').classList.add('show'); }
@@ -2666,40 +2407,33 @@
         catatan: 'Alarm Panic SOS diaktifkan dari ponsel warga'
       };
 
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            closeSosResidentModal();
-            showToast('🚨 Sinyal darurat dikirimkan! Bantuan & siaran WhatsApp meluncur.', 'warning');
-          })
-          .triggerEmergencySOS(payload);
-      } else {
+      requestBackend('triggerEmergencySOS', payload, function(res) {
         closeSosResidentModal();
-        showToast('[Preview] Sinyal SOS Terkirim!', 'warning');
-        triggerVisualAndAudioAlarm({
-          id: 'EMG-DEMO',
-          blok: blok,
-          penghuni: 'Keluarga Bpk. Adit',
-          kontak: '085712349876',
-          kategori: kat,
-          waktu: 'Sekarang'
-        });
-      }
+        if (res && res.success) {
+          showToast('🚨 Sinyal darurat dikirimkan! Bantuan & siaran WhatsApp meluncur.', 'warning');
+        } else {
+          showToast('[Preview] Sinyal SOS Terkirim!', 'warning');
+          triggerVisualAndAudioAlarm({
+            id: 'EMG-DEMO',
+            blok: blok,
+            penghuni: 'Keluarga Bpk. Adit',
+            kontak: '085712349876',
+            kategori: kat,
+            waktu: 'Sekarang'
+          });
+        }
+      });
     }
 
     function startEmergencyWatcher() {
       setInterval(function() {
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run
-            .withSuccessHandler(function(res) {
-              if (res && res.success && res.active && res.data) {
-                if (state.lastAlertedEmergencyId !== res.data.id) {
-                  triggerVisualAndAudioAlarm(res.data);
-                }
-              }
-            })
-            .checkActiveEmergency();
-        }
+        requestBackend('checkActiveEmergency', null, function(res) {
+          if (res && res.success && res.active && res.data) {
+            if (state.lastAlertedEmergencyId !== res.data.id) {
+              triggerVisualAndAudioAlarm(res.data);
+            }
+          }
+        });
       }, 4000);
     }
 
@@ -2716,7 +2450,6 @@
       startSirenAudio();
       triggerHapticFeedback();
 
-      // Trigger Web Push Notification for Background/Minimized Tab
       if ('Notification' in window && Notification.permission === 'granted') {
         try {
           new Notification('🚨 DARURAT POS SATPAM: ' + data.blok, {
@@ -2771,40 +2504,31 @@
       document.getElementById('emergencyStrobeOverlay').style.display = 'none';
 
       if (state.activeEmergencyId) {
-        if (typeof google !== 'undefined' && google.script && google.script.run) {
-          google.script.run
-            .withSuccessHandler(function(res) {
-              showToast('Status darurat selesai ditangani.', 'success');
-              state.activeEmergencyId = null;
-            })
-            .resolveEmergencySOS(state.activeEmergencyId, 'Ditangani oleh Satpam Pos Jaga');
-        } else {
-          showToast('[Preview] Darurat ditutup.', 'success');
+        requestBackend('resolveEmergencySOS', { emgId: state.activeEmergencyId, catatan: 'Ditangani Satpam' }, function(res) {
+          showToast('Status darurat selesai ditangani.', 'success');
           state.activeEmergencyId = null;
-        }
+        });
       }
     }
 
     function openShiftModal() {
       document.getElementById('shiftModal').classList.add('show');
-      if (typeof google !== 'undefined' && google.script && google.script.run) {
-        google.script.run
-          .withSuccessHandler(function(res) {
-            if (res && res.success) populateShiftReport(res);
-          })
-          .getShiftHandoverReport();
-      } else {
-        populateShiftReport({
-          reportDate: '21/10/2026',
-          printedAt: '21/10/2026 12:00:00',
-          totalMasuk: 3,
-          totalKeluar: 1,
-          totalAktif: 2,
-          totalOverstay: 1,
-          keperluanStats: { 'Kurir Paket': 1, 'Teknisi/Tukang': 1, 'Tamu Warga': 1 },
-          activeGuests: [{ plat: 'D 1982 ABC', nama: 'Agus Indihome', blok: 'Blok B-05', isOverstay: 'YA' }]
-        });
-      }
+      requestBackend('getShiftHandoverReport', null, function(res) {
+        if (res && res.success) {
+          populateShiftReport(res);
+        } else {
+          populateShiftReport({
+            reportDate: '21/10/2026',
+            printedAt: '21/10/2026 12:00:00',
+            totalMasuk: 3,
+            totalKeluar: 1,
+            totalAktif: 2,
+            totalOverstay: 1,
+            keperluanStats: { 'Kurir Paket': 1, 'Teknisi/Tukang': 1, 'Tamu Warga': 1 },
+            activeGuests: [{ plat: 'D 1982 ABC', nama: 'Agus Indihome', blok: 'Blok B-05', isOverstay: 'YA' }]
+          });
+        }
+      });
     }
 
     function populateShiftReport(rpt) {
